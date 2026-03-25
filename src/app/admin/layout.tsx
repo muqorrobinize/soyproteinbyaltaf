@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { Users, QrCode, KeyRound, LayoutDashboard, BookOpen, ArrowLeft } from 'lucide-react'
+import { Users, QrCode, KeyRound, LayoutDashboard, BookOpen, ArrowLeft, Brain } from 'lucide-react'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -19,6 +19,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'QR Codes', href: '/admin/qr', icon: QrCode },
     { name: 'API Keys', href: '/admin/keys', icon: KeyRound },
+    { name: 'Knowledge Base', href: '/admin/knowledge', icon: Brain },
     { name: 'Setup Guide', href: '/admin/guide', icon: BookOpen },
   ]
 
