@@ -1,64 +1,80 @@
--- Users and profiles are usually handled by Supabase Auth (auth.users).
--- We create a public.users table that references auth.users to store additional info like subscription_end.
+-- ============================================
+-- SoyProtein by Altaf - Complete Database Setup
+-- Run this ONCE in Supabase SQL Editor
+-- ============================================
 
-create table public.users (
-  id uuid references auth.users on delete cascade not null primary key,
+-- 1. USERS TABLE (linked to Supabase Auth)
+CREATE TABLE IF NOT EXISTS public.users (
+  id uuid REFERENCES auth.users ON DELETE CASCADE NOT NULL PRIMARY KEY,
   email text,
   subscription_end timestamp with time zone,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+  role text NOT NULL DEFAULT 'user',
+  is_blocked boolean NOT NULL DEFAULT false,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Enable RLS
-alter table public.users enable row level security;
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
--- Create policies for public.users
-create policy "Users can view their own profile" on public.users
-  for select using (auth.uid() = id);
+CREATE POLICY "Users can view their own profile"
+  ON public.users FOR SELECT
+  USING (auth.uid() = id);
 
-create policy "Users can update their own profile" on public.users
-  for update using (auth.uid() = id);
+CREATE POLICY "Users can update their own profile"
+  ON public.users FOR UPDATE
+  USING (auth.uid() = id);
 
--- Function to handle new user signup
-create or replace function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.users (id, email)
-  values (new.id, new.email);
-  return new;
-end;
-$$ language plpgsql security definer;
+-- 2. AUTO-CREATE USER PROFILE ON SIGNUP
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.users (id, email)
+  VALUES (new.id, new.email);
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger to call the function on signup
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
--- Table for QR Codes
-create table public.qr_codes (
-  code text primary key,
-  duration integer not null default 7, -- duration in days
-  status text not null default 'unused', -- 'unused', 'used'
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+-- 3. QR CODES TABLE
+CREATE TABLE IF NOT EXISTS public.qr_codes (
+  code text PRIMARY KEY,
+  duration integer NOT NULL DEFAULT 7,
+  status text NOT NULL DEFAULT 'unused',
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- RLS for QR Codes
--- Only service_role (backend server) can freely access qr_codes. So we don't grant public policies.
-alter table public.qr_codes enable row level security;
+ALTER TABLE public.qr_codes ENABLE ROW LEVEL SECURITY;
 
--- Table for Redemptions
-create table public.redemptions (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references public.users(id) not null,
-  code text references public.qr_codes(code) not null,
-  redeemed_at timestamp with time zone default timezone('utc'::text, now()) not null
+-- 4. REDEMPTIONS TABLE
+CREATE TABLE IF NOT EXISTS public.redemptions (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid REFERENCES public.users(id) NOT NULL,
+  code text REFERENCES public.qr_codes(code) NOT NULL,
+  redeemed_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- RLS for Redemptions
-alter table public.redemptions enable row level security;
-create policy "Users can view their own redemptions" on public.redemptions
-  for select using (auth.uid() = user_id);
+ALTER TABLE public.redemptions ENABLE ROW LEVEL SECURITY;
 
--- Insert dummy data into QR Codes
-insert into public.qr_codes (code, duration, status) values
-  ('TRIAL7', 7, 'unused'),
-  ('PRO30', 30, 'unused');
+CREATE POLICY "Users can view their own redemptions"
+  ON public.redemptions FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- 5. API KEYS TABLE (for multi-provider AI key rotation)
+CREATE TABLE IF NOT EXISTS public.api_keys (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  provider text NOT NULL DEFAULT 'openai',
+  name text NOT NULL DEFAULT 'Default Key',
+  key_value text NOT NULL,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.api_keys ENABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- DONE! All tables are ready.
+-- Now go back to your app and login.
+-- ============================================
