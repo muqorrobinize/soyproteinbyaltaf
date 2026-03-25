@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
+import crypto from 'crypto'
 
 async function verifyAdmin() {
   const supabase = await createClient()
@@ -42,7 +43,33 @@ export async function makeUserAdmin(userId: string) {
   revalidatePath('/admin/users')
 }
 
-// QR Actions
+export async function adjustSubscription(userId: string, days: number) {
+  if (!(await verifyAdmin())) throw new Error('Unauthorized')
+  const supabaseAdmin = getAdminClient()
+
+  const { data: user } = await supabaseAdmin.from('users').select('subscription_end').eq('id', userId).single()
+
+  let baseDate = new Date()
+  if (user?.subscription_end) {
+    const existingEnd = new Date(user.subscription_end)
+    if (existingEnd > baseDate) {
+      baseDate = existingEnd
+    }
+  }
+
+  const newEnd = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000)
+
+  // If days is negative and result is in the past, set to null (no subscription)
+  if (newEnd < new Date()) {
+    await supabaseAdmin.from('users').update({ subscription_end: null }).eq('id', userId)
+  } else {
+    await supabaseAdmin.from('users').update({ subscription_end: newEnd.toISOString() }).eq('id', userId)
+  }
+
+  revalidatePath('/admin/users')
+}
+
+// QR Actions - single code
 export async function generateQrCode(formData: FormData) {
   if (!(await verifyAdmin())) throw new Error('Unauthorized')
   const code = formData.get('code') as string
@@ -53,6 +80,33 @@ export async function generateQrCode(formData: FormData) {
   const supabaseAdmin = getAdminClient()
   await supabaseAdmin.from('qr_codes').insert({ code: code.toUpperCase(), duration, status: 'unused' })
   revalidatePath('/admin/qr')
+}
+
+// QR Actions - bulk generate with unique hashes
+export async function bulkGenerateQrCodes(formData: FormData) {
+  if (!(await verifyAdmin())) throw new Error('Unauthorized')
+  const prefix = (formData.get('prefix') as string || 'SP').toUpperCase()
+  const count = parseInt(formData.get('count') as string)
+  const duration = parseInt(formData.get('duration') as string)
+
+  if (!count || count < 1 || count > 500 || !duration) throw new Error('Invalid input')
+
+  const supabaseAdmin = getAdminClient()
+  const codes: { code: string; duration: number; status: string }[] = []
+
+  for (let i = 0; i < count; i++) {
+    const hash = crypto.randomBytes(6).toString('hex').toUpperCase()
+    codes.push({
+      code: `${prefix}-${hash}`,
+      duration,
+      status: 'unused',
+    })
+  }
+
+  await supabaseAdmin.from('qr_codes').insert(codes)
+  revalidatePath('/admin/qr')
+
+  return codes.map(c => c.code)
 }
 
 export async function deleteQrCode(code: string) {
