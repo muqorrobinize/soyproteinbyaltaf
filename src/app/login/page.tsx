@@ -1,78 +1,96 @@
 import { login, signup } from './actions'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import Link from 'next/link'
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string; message?: string }>
 }) {
-  const { error } = await searchParams
+  const { error, message } = await searchParams
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center flex-col px-4 relative">
-      <div className="absolute top-4 right-4 z-50">
+    <div className="flex min-h-dvh w-full items-center justify-center flex-col px-4 relative">
+      {/* Background */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute top-0 left-1/4 w-72 h-72 rounded-full opacity-10 blur-[80px]" style={{ background: 'var(--accent)' }} />
+        <div className="absolute bottom-0 right-1/4 w-64 h-64 rounded-full opacity-8 blur-[60px]" style={{ background: 'var(--accent)' }} />
+      </div>
+
+      <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
+        <Link href="/" className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>← Home</Link>
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-md p-8 glass-panel flex flex-col gap-6 relative z-10">
+      <div className="w-full max-w-sm glass-panel p-7 flex flex-col gap-5 relative z-10 animate-slide-up">
+        {/* Header */}
         <div className="text-center">
-          <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mb-4 text-3xl shadow-inner border border-green-200 dark:border-green-800">
-            👋
+          <div className="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-md" style={{ background: 'var(--accent)', color: '#fff' }}>
+            🍵
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-green-950 dark:text-green-50">Welcome Back</h1>
-          <p className="text-green-800/70 dark:text-green-200/70 mt-2 font-medium">Sign in or create an account to access your AI Coach</p>
+          <h1 className="text-2xl font-extrabold" style={{ color: 'var(--text-primary)' }}>SoyProtein</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Masuk atau buat akun baru</p>
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="p-4 bg-red-50/80 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 rounded-xl text-sm text-center font-bold backdrop-blur-sm">
+          <div className="px-4 py-3 rounded-xl text-sm font-semibold text-center" style={{ background: 'rgba(192,57,43,0.10)', color: 'var(--danger)', border: '1px solid rgba(192,57,43,0.2)' }}>
             {error}
           </div>
         )}
 
-        <form className="flex flex-col gap-5">
-          <div className="flex flex-col gap-2">
-            <label htmlFor="email" className="text-sm font-bold text-green-900 dark:text-green-100">Email</label>
+        {/* Success / info */}
+        {message && (
+          <div className="px-4 py-3 rounded-xl text-sm font-semibold text-center" style={{ background: 'rgba(77,124,95,0.12)', color: 'var(--accent)', border: '1px solid var(--border-strong)' }}>
+            {message}
+          </div>
+        )}
+
+        <form className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="email" className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>Email</label>
             <input
               id="email"
               name="email"
               type="email"
               required
-              className="p-4 bg-white/50 dark:bg-black/20 border border-green-200 dark:border-green-800 text-green-950 dark:text-green-50 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all outline-none backdrop-blur-sm placeholder-green-800/40 dark:placeholder-green-200/40 font-medium"
-              placeholder="you@example.com"
+              autoComplete="email"
+              className="input-field"
+              placeholder="kamu@email.com"
             />
           </div>
           
-          <div className="flex flex-col gap-2">
-            <label htmlFor="password" className="text-sm font-bold text-green-900 dark:text-green-100">Password</label>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="password" className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>Password</label>
             <input
               id="password"
               name="password"
               type="password"
               required
-              className="p-4 bg-white/50 dark:bg-black/20 border border-green-200 dark:border-green-800 text-green-950 dark:text-green-50 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all outline-none backdrop-blur-sm placeholder-green-800/40 dark:placeholder-green-200/40 font-medium"
-              placeholder="••••••••"
+              autoComplete="current-password"
+              className="input-field"
+              placeholder="Min. 6 karakter"
             />
           </div>
 
-          <div className="flex flex-col gap-3 mt-4">
-            <button
-              formAction={login}
-              className="w-full py-4 bg-green-600 text-white font-extrabold rounded-xl hover:bg-green-500 active:scale-[0.98] transition-all shadow-md shadow-green-600/20"
-            >
-              Sign In
+          <div className="flex flex-col gap-3 pt-1">
+            <button formAction={login} className="btn-primary">
+              Masuk
             </button>
-            <div className="relative flex items-center justify-center py-2">
-              <div className="absolute border-t border-green-200 dark:border-green-800/50 w-full"></div>
-              <span className="bg-transparent backdrop-blur-md px-4 text-xs font-bold text-green-800/50 dark:text-green-200/50 relative">OR</span>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
+              <span className="text-xs font-bold" style={{ color: 'var(--text-muted)' }}>ATAU</span>
+              <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
             </div>
-            <button
-              formAction={signup}
-              className="w-full py-4 bg-white/40 dark:bg-black/40 text-green-900 dark:text-green-100 font-extrabold rounded-xl border border-green-200 dark:border-green-800/50 hover:bg-white/60 dark:hover:bg-black/60 active:scale-[0.98] transition-all backdrop-blur-sm"
-            >
-              Create Account
+            <button formAction={signup} className="btn-secondary">
+              Buat Akun Baru
             </button>
           </div>
         </form>
+
+        <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
+          Dengan masuk, kamu menyetujui penggunaan platform untuk keperluan nutrisi pribadi.
+        </p>
       </div>
     </div>
   )

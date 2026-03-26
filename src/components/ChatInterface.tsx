@@ -8,7 +8,6 @@ export default function ChatInterface() {
   // @ts-expect-error
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
     api: '/api/chat',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -18,64 +17,92 @@ export default function ChatInterface() {
   }, [messages])
 
   return (
-    <div className="flex-1 flex flex-col p-5 bg-transparent relative">
-      <div className="flex-1 rounded-2xl border border-green-200/50 dark:border-green-800/50 bg-white/40 dark:bg-black/20 mb-5 p-4 flex flex-col shadow-inner overflow-y-auto max-h-[450px]">
+    <div className="flex-1 flex flex-col min-h-0">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto custom-scroll p-4 space-y-3" style={{ minHeight: 0 }}>
         {messages.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center text-green-800/60 dark:text-green-200/60 h-full">
-            <div className="animate-bounce mb-2 text-4xl">🌱</div>
-            <p className="font-bold text-green-900 dark:text-green-100 text-lg">Ready to transform your health?</p>
-            <p className="text-sm mt-1 font-medium">Ask me anything about your diet or fitness goals!</p>
+          <div className="flex flex-col items-center justify-center h-full text-center py-8 space-y-3">
+            <div className="text-4xl animate-bounce">🌱</div>
+            <p className="font-bold" style={{ color: 'var(--text-primary)' }}>AI Coach siap membantu!</p>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Tanya tentang diet, protein, jadwal makan, atau tips fitness</p>
+            <div className="flex flex-wrap gap-2 justify-center mt-2">
+              {['Berapa protein yang saya butuhkan?', 'Buat meal plan untuk bulking', 'Tips konsistensi gym'].map(suggestion => (
+                <button
+                  key={suggestion}
+                  onClick={() => {
+                    const input = document.querySelector('[data-chat-input]') as HTMLInputElement
+                    if (input) { input.value = suggestion; input.dispatchEvent(new Event('input', { bubbles: true })) }
+                  }}
+                  className="text-xs px-3 py-1.5 rounded-full font-medium transition-all"
+                  style={{ background: 'var(--surface-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <>
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {messages.map((m: any) => (
-              <div
-                key={m.id}
-                className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+              <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
+                {m.role === 'assistant' && (
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0 mr-2 mt-1" style={{ background: 'var(--accent)', color: '#fff' }}>🤖</div>
+                )}
                 <div
-                  className={`max-w-[85%] rounded-2xl p-4 shadow-sm backdrop-blur-md ${
-                    m.role === 'user'
-                      ? 'bg-green-600 text-white rounded-tr-sm border border-green-500'
-                      : 'bg-white/70 dark:bg-black/50 text-green-950 dark:text-green-50 rounded-tl-sm border border-green-200/50 dark:border-green-800/50'
-                  }`}
+                  className="max-w-[82%] sm:max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed font-medium"
+                  style={m.role === 'user' ? {
+                    background: 'var(--accent)',
+                    color: '#fff',
+                    borderBottomRightRadius: '0.25rem',
+                  } : {
+                    background: 'var(--surface-hover)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border)',
+                    borderBottomLeftRadius: '0.25rem',
+                  }}
                 >
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed font-medium">{m.content}</p>
+                  <p className="whitespace-pre-wrap">{m.content}</p>
                 </div>
               </div>
             ))}
             {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-white/70 dark:bg-black/50 text-green-950 dark:text-green-50 rounded-2xl p-4 rounded-tl-sm animate-pulse border border-green-200/50 dark:border-green-800/50 backdrop-blur-md">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <div className="w-2 h-2 bg-green-500 rounded-full animation-delay-100"></div>
-                    <div className="w-2 h-2 bg-green-500 rounded-full animation-delay-200"></div>
-                  </div>
+              <div className="flex justify-start animate-fade-in">
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0 mr-2 mt-1" style={{ background: 'var(--accent)', color: '#fff' }}>🤖</div>
+                <div className="px-4 py-3 rounded-2xl flex gap-1 items-center" style={{ background: 'var(--surface-hover)', border: '1px solid var(--border)' }}>
+                  <div className="typing-dot" />
+                  <div className="typing-dot" />
+                  <div className="typing-dot" />
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
-          </div>
+          </>
         )}
       </div>
-      
-      <form onSubmit={handleSubmit} className="flex gap-3 relative z-10">
-        <input
-          value={input}
-          onChange={handleInputChange}
-          placeholder="Ask your coach anything..."
-          className="flex-1 p-4 bg-white/60 dark:bg-black/40 border border-green-200 dark:border-green-800 text-green-950 dark:text-green-50 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all backdrop-blur-md placeholder-green-800/40 dark:placeholder-green-200/40 font-medium"
-        />
-        <button
-          type="submit"
-          disabled={isLoading || !input.trim()}
-          className="px-8 py-4 bg-green-600 text-white font-extrabold rounded-2xl shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-500 hover:shadow-lg hover:shadow-green-600/20 active:scale-95 transition-all"
-        >
-          Send
-        </button>
-      </form>
+
+      {/* Input */}
+      <div className="p-3 sm:p-4 border-t" style={{ borderColor: 'var(--border)' }}>
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <input
+            data-chat-input
+            value={input}
+            onChange={handleInputChange}
+            placeholder="Tanya coach kamu..."
+            className="input-field !rounded-2xl !py-3 text-sm"
+            style={{ flex: 1 }}
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !input.trim()}
+            className="btn-primary !w-auto !px-4 !py-3 !rounded-2xl shrink-0"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

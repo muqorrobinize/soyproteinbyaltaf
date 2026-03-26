@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -29,30 +30,54 @@ export async function signup(formData: FormData) {
   const password = formData.get('password') as string
 
   if (!email || !password) {
-    redirect('/login?error=Email+and+password+are+required')
+    redirect('/login?error=Email+dan+password+wajib+diisi')
   }
 
   if (password.length < 6) {
-    redirect('/login?error=Password+must+be+at+least+6+characters')
+    redirect('/login?error=Password+minimal+6+karakter')
   }
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-  })
+  const { data, error } = await supabase.auth.signUp({ email, password })
 
   if (error) {
     redirect(`/login?error=${encodeURIComponent(error.message)}`)
   }
 
-  // If email confirmation is required, Supabase returns a user with identities = []
+  // Email already registered
   if (data?.user?.identities?.length === 0) {
-    redirect('/login?error=Account+already+exists.+Please+Sign+In+instead.')
+    redirect('/login?error=Email+sudah+terdaftar.+Silakan+Sign+In.')
   }
 
-  // Check if email confirmation is needed
+  // Email confirmation required (disabled → session immediately available)
   if (data?.user && !data.session) {
-    redirect('/login?error=Check+your+email+for+a+confirmation+link+then+Sign+In')
+    // Confirmation needed — create user row manually so profile exists
+    if (data.user.id) {
+      try {
+        const supabaseAdmin = createServiceClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
+        await supabaseAdmin.from('users').upsert({
+          id: data.user.id,
+          email: data.user.email,
+        }, { onConflict: 'id', ignoreDuplicates: true })
+      } catch { /* ignore */ }
+    }
+    redirect('/login?error=Cek+email+kamu+untuk+konfirmasi,+lalu+Sign+In')
+  }
+
+  // Auto-create user profile if trigger hasn't run yet (race condition safety)
+  if (data?.user?.id) {
+    try {
+      const supabaseAdmin = createServiceClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+      await supabaseAdmin.from('users').upsert({
+        id: data.user.id,
+        email: data.user.email,
+      }, { onConflict: 'id', ignoreDuplicates: true })
+    } catch { /* ignore, trigger handles it */ }
   }
 
   revalidatePath('/', 'layout')

@@ -3,43 +3,78 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center min-h-screen p-4 sm:p-8">
-      <div className="absolute top-4 right-4 z-50">
-        <ThemeToggle />
+    <div className="flex flex-col min-h-dvh relative overflow-hidden">
+      {/* Background orbs */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[var(--accent)] opacity-10 blur-[100px]" />
+        <div className="absolute -bottom-32 -right-32 w-80 h-80 rounded-full bg-[var(--accent)] opacity-8 blur-[80px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-emerald-400 opacity-5 blur-[60px]" />
       </div>
-      
-      <main className="glass-panel w-full max-w-3xl flex flex-col items-center justify-between py-24 px-8 sm:px-16 sm:items-start text-center sm:text-left relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-green-400/20 dark:bg-green-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-emerald-400/20 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div className="flex flex-col items-center gap-6 sm:items-start w-full relative z-10">
-          <div className="mx-auto sm:mx-0 w-20 h-20 bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mb-4 text-4xl shadow-inner border border-green-200 dark:border-green-800">
-            🌱
-          </div>
-          <h1 className="max-w-md text-4xl sm:text-5xl font-extrabold tracking-tight text-green-950 dark:text-green-50 leading-tight">
-            SoyProtein <span className="text-green-600 dark:text-green-400">by Altaf</span>
-          </h1>
-          <p className="max-w-lg text-lg leading-relaxed text-green-800/80 dark:text-green-200/80 font-medium">
-            Your personal AI-powered nutrition coach. Unlock optimal health and fitness with smart strategies tailored just for you.
-          </p>
+      {/* Nav */}
+      <nav className="relative z-50 flex items-center justify-between px-5 py-4 sm:px-10">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">🍵</span>
+          <span className="font-extrabold text-lg" style={{ color: 'var(--text-primary)' }}>SoyProtein</span>
+          <span className="text-sm font-medium opacity-60 hidden sm:inline" style={{ color: 'var(--text-secondary)' }}>by Altaf</span>
         </div>
-        
-        <div className="flex flex-col gap-4 text-base font-bold sm:flex-row mt-12 w-full sm:w-auto relative z-10">
-          <Link
-            href="/login"
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-green-600 px-8 text-white transition-all hover:bg-green-500 hover:shadow-lg hover:shadow-green-600/20 active:scale-95 sm:w-auto"
-          >
-            Get Started
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link href="/login" className="btn-primary !w-auto !px-5 !py-2.5 !text-sm">
+            Masuk
           </Link>
-          <Link
-            href="/redeem"
-            className="flex h-14 w-full items-center justify-center rounded-2xl border-2 border-green-600/20 dark:border-green-400/20 px-8 transition-all hover:border-transparent hover:bg-green-50 dark:hover:bg-green-900/30 text-green-800 dark:text-green-100 sm:w-auto"
-          >
-            Redeem Code
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 py-16 sm:py-24 text-center animate-slide-up">
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-8 text-sm font-bold" style={{ borderColor: 'var(--border-strong)', color: 'var(--text-secondary)', background: 'var(--surface)' }}>
+          <span>🤖</span> AI-Powered Nutrition Coaching
+        </div>
+
+        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight max-w-2xl mb-6" style={{ color: 'var(--text-primary)' }}>
+          Nutrisi Cerdas,{" "}
+          <span style={{ color: 'var(--accent)' }}>Hasil Nyata</span>
+        </h1>
+        <p className="text-base sm:text-xl max-w-lg mb-10 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+          Platform coaching nutrisi berbasis AI yang terintegrasi dengan produk kedelai. Scan QR, redeem, dan mulai perjalanan menuju tubuh ideal.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm sm:max-w-md">
+          <Link href="/login" className="btn-primary !rounded-2xl !py-4 text-base">
+            🚀 Mulai Sekarang
           </Link>
+          <Link href="/redeem" className="btn-secondary !rounded-2xl !py-4 text-base">
+            🎁 Redeem Code
+          </Link>
+        </div>
+
+        {/* Trust signals */}
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-4 sm:gap-8">
+          {['🧬 Evidence-based', '🔒 Data aman', '📱 Mobile-first', '🎯 Adaptive AI'].map(item => (
+            <span key={item} className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{item}</span>
+          ))}
         </div>
       </main>
+
+      {/* Features strip */}
+      <div className="relative z-10 pb-12 px-5">
+        <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { icon: '📦', title: 'Scan QR', desc: 'Di kemasan produk' },
+            { icon: '🎯', title: 'AI Coach', desc: 'Personal & adaptif' },
+            { icon: '📊', title: 'Tracking', desc: '1 klik per hari' },
+            { icon: '🔄', title: 'Repeat', desc: 'Beli lagi, extend' },
+          ].map(f => (
+            <div key={f.title} className="glass-panel p-4 text-center animate-fade-in">
+              <div className="text-2xl mb-2">{f.icon}</div>
+              <p className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{f.title}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
