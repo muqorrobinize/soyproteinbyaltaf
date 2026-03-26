@@ -1,12 +1,17 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 
-export default function ChatInterface() {
+interface ChatInterfaceProps {
+  autoPrompt?: string
+}
+
+export default function ChatInterface({ autoPrompt }: ChatInterfaceProps) {
+  const [autoSent, setAutoSent] = useState(false)
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, isLoading, append } = useChat({
     api: '/api/chat',
   } as any)
 
@@ -15,6 +20,17 @@ export default function ChatInterface() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Auto-send plan request after onboarding
+  useEffect(() => {
+    if (autoPrompt && !autoSent && append) {
+      setAutoSent(true)
+      setTimeout(() => {
+        append({ role: 'user', content: autoPrompt })
+      }, 800)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPrompt, append])
 
   return (
     <div className="flex-1 flex flex-col min-h-0">

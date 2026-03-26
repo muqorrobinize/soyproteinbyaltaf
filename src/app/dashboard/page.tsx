@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import ChatInterface from '@/components/ChatInterface'
@@ -7,13 +8,35 @@ import TrackingWidget from '@/components/TrackingWidget'
 import ScheduleWidget from '@/components/ScheduleWidget'
 import { ThemeToggle } from '@/components/ThemeToggle'
 
-export default async function DashboardPage() {
+const GENESIS_EMAIL = 'muqorroben@gmail.com'
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ onboarding?: string; success?: string }>
+}) {
+  const { onboarding } = await searchParams
   const supabase = await createClient()
 
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) redirect('/login')
 
-  const { data: profile } = await supabase
+  const isGenesisAdmin = user.email === GENESIS_EMAIL
+
+  // Admin service client for upsert/reads
+  const adminClient = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  // Ensure user row always exists (handles genesis admin + any race condition)
+  await adminClient.from('users').upsert({
+    id: user.id,
+    email: user.email,
+  }, { onConflict: 'id', ignoreDuplicates: true })
+
+  // Fetch full profile
+  const { data: profile } = await adminClient
     .from('users')
     .select('*')
     .eq('id', user.id)
@@ -31,14 +54,16 @@ export default async function DashboardPage() {
     )
   }
 
+  // Show onboarding if not completed
   if (profile && !profile.onboarding_complete) {
     return <OnboardingForm userId={user.id} email={user.email || ''} />
   }
 
   const subscriptionEnd = profile?.subscription_end ? new Date(profile.subscription_end) : null
-  const isActive = subscriptionEnd && subscriptionEnd > new Date()
-  const isAdmin = profile?.role === 'admin' || user.email === 'muqorroben@gmail.com'
-  const daysLeft = subscriptionEnd ? Math.ceil((subscriptionEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
+  // Genesis admin and role=admin always have active access
+  const isAdmin = isGenesisAdmin || profile?.role === 'admin'
+  const isActive = isAdmin || (subscriptionEnd !== null && subscriptionEnd > new Date())
+  const daysLeft = subscriptionEnd ? Math.ceil((subscriptionEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null
 
   // Tracking data for last 7 days
   const today = new Date()
@@ -64,6 +89,11 @@ export default async function DashboardPage() {
   const todayStr = today.toISOString().split('T')[0]
   const alreadyTrackedToday = recentDays.find(d => d.date === todayStr)?.logged || false
 
+  // Auto-conversation starter after onboarding
+  const autoPrompt = onboarding === 'done' && profile?.goal
+    ? `Halo! Saya baru saja mengisi profil. Berat: ${profile.weight_kg}kg, Tinggi: ${profile.height_cm}cm, Usia: ${profile.age} tahun, Tujuan: ${profile.goal}, Aktivitas: ${profile.activity_level}. Tolong buatkan rencana nutrisi dan jadwal harian yang sudah dipersonalisasi untuk saya, termasuk dosis soy protein yang tepat.`
+    : undefined
+
   return (
     <div className="min-h-dvh flex flex-col">
       {/* Header */}
@@ -71,11 +101,14 @@ export default async function DashboardPage() {
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-xl">🍵</span>
           <span className="font-extrabold truncate" style={{ color: 'var(--text-primary)' }}>SoyProtein</span>
+          {isAdmin && (
+            <span className="hidden sm:inline text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: 'var(--accent)', color: '#fff' }}>Admin</span>
+          )}
         </div>
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {isAdmin && (
             <Link href="/admin" className="text-xs font-bold px-3 py-1.5 rounded-xl text-white" style={{ background: 'var(--accent)' }}>
-              Admin
+              Panel Admin
             </Link>
           )}
           <ThemeToggle />
@@ -96,14 +129,24 @@ export default async function DashboardPage() {
             </h1>
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{user.email}</p>
           </div>
-          {/* Subscription pill */}
-          <Link href="/redeem" className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold transition-all ${isActive ? '' : 'animate-pulse'}`} style={isActive ? { background: 'rgba(77,124,95,0.12)', color: 'var(--accent)', border: '1px solid var(--border-strong)' } : { background: 'var(--warning)', color: '#fff' }}>
-            <span>{isActive ? '✨' : '⚠️'}</span>
-            <span>{isActive ? `${daysLeft} hari tersisa` : 'Redeem Code'}</span>
-          </Link>
+          {/* Subscription status pill */}
+          {isAdmin ? (
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: 'rgba(86,196,122,0.15)', color: 'var(--accent)', border: '1px solid var(--border-strong)' }}>
+              ♾️ Unlimited Access
+            </span>
+          ) : (
+            <Link href="/redeem" className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold transition-all ${isActive ? '' : 'animate-pulse'}`}
+              style={isActive
+                ? { background: 'rgba(77,124,95,0.12)', color: 'var(--accent)', border: '1px solid var(--border-strong)' }
+                : { background: 'var(--warning)', color: '#fff' }
+              }>
+              <span>{isActive ? '✨' : '⚠️'}</span>
+              <span>{isActive && daysLeft !== null ? `${daysLeft} hari tersisa` : isActive ? 'Aktif' : 'Redeem Code'}</span>
+            </Link>
+          )}
         </div>
 
-        {/* Tracking widget */}
+        {/* Tracking Widget */}
         {isActive && (
           <TrackingWidget
             alreadyTrackedToday={alreadyTrackedToday}
@@ -113,9 +156,8 @@ export default async function DashboardPage() {
         )}
 
         {isActive ? (
-          /* Main content: 2-column on large screens */
           <div className="flex-1 grid lg:grid-cols-5 gap-4">
-            {/* Schedule — sidebar on lg */}
+            {/* Schedule */}
             <div className="lg:col-span-2">
               <ScheduleWidget
                 weightKg={profile?.weight_kg}
@@ -132,12 +174,16 @@ export default async function DashboardPage() {
                   <p className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>AI Nutrition Coach</p>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>evidence-based · personalized</p>
                 </div>
+                {onboarding === 'done' && (
+                  <span className="ml-auto text-xs px-2 py-1 rounded-full font-bold" style={{ background: 'rgba(86,196,122,0.15)', color: 'var(--accent)' }}>
+                    🎉 Plan sedang dibuat...
+                  </span>
+                )}
               </div>
-              <ChatInterface />
+              <ChatInterface autoPrompt={autoPrompt} />
             </div>
           </div>
         ) : (
-          /* Locked state */
           <div className="flex-1 glass-panel flex flex-col items-center justify-center py-16 text-center px-6">
             <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-6 shadow-lg" style={{ background: 'var(--surface-hover)', border: '2px solid var(--border-strong)' }}>🔒</div>
             <h2 className="text-xl font-extrabold mb-2" style={{ color: 'var(--text-primary)' }}>Akses Terkunci</h2>
