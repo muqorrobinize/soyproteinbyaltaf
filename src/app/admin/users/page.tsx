@@ -30,7 +30,24 @@ export default async function AdminUsersPage() {
 
                 return (
                   <tr key={user.id} className="border-b border-green-100 dark:border-green-900/50 hover:bg-white/40 dark:hover:bg-black/20">
-                    <td className="p-4 text-green-800 dark:text-green-200 text-sm">{user.email || 'N/A'}</td>
+                    <td className="p-4 text-sm text-[var(--text-primary)]">
+                      <div className="font-bold mb-1">{user.email || 'N/A'}</div>
+                      <details className="text-xs group cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
+                        <summary className="font-bold hover:text-[var(--accent)] transition-colors inline-flex items-center gap-1 select-none">
+                          <span className="group-open:rotate-90 transition-transform">▶</span> View Info
+                        </summary>
+                        <div className="mt-2 p-3 rounded-xl border space-y-1.5" style={{ background: 'var(--surface-hover)', borderColor: 'var(--border)' }}>
+                          <p><strong style={{ color: 'var(--text-primary)' }}>Name:</strong> {user.display_name || '-'}</p>
+                          <p><strong style={{ color: 'var(--text-primary)' }}>Weight:</strong> {user.weight_kg ? `${user.weight_kg} kg` : '-'}</p>
+                          <p><strong style={{ color: 'var(--text-primary)' }}>Height:</strong> {user.height_cm ? `${user.height_cm} cm` : '-'}</p>
+                          <p><strong style={{ color: 'var(--text-primary)' }}>Age:</strong> {user.age || '-'}</p>
+                          <p><strong style={{ color: 'var(--text-primary)' }}>Gender:</strong> {user.gender || '-'}</p>
+                          <p><strong style={{ color: 'var(--text-primary)' }}>Goal:</strong> {user.goal || '-'}</p>
+                          <p><strong style={{ color: 'var(--text-primary)' }}>Activity:</strong> {user.activity_level || '-'}</p>
+                          {user.dietary_notes && <p><strong style={{ color: 'var(--text-primary)' }}>Notes:</strong> {user.dietary_notes}</p>}
+                        </div>
+                      </details>
+                    </td>
                     <td className="p-4">
                       <span className={`px-2 py-1 rounded text-xs font-bold ${user.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300' : 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'}`}>
                         {user.role}

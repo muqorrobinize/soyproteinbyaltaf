@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS public.api_keys (
   name text not null default 'Default Key',
   key_value text not null,
   is_active boolean not null default true,
+  last_checked_tier text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

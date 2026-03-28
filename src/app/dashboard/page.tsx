@@ -21,7 +21,7 @@ export default async function DashboardPage({
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) redirect('/login')
 
-  const isGenesisAdmin = user.email === GENESIS_EMAIL
+  const isGenesisAdmin = user.email?.toLowerCase() === GENESIS_EMAIL.toLowerCase()
 
   // Admin service client for upsert/reads
   const adminClient = createServiceClient(

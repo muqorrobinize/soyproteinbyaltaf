@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { saveOnboarding } from '@/app/dashboard/onboarding-actions'
 
 interface OnboardingProps {
@@ -9,6 +10,7 @@ interface OnboardingProps {
 }
 
 export default function OnboardingForm({ userId, email }: OnboardingProps) {
+  const router = useRouter()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -29,7 +31,7 @@ export default function OnboardingForm({ userId, email }: OnboardingProps) {
     setLoading(true)
     setError('')
     try {
-      await saveOnboarding({
+      const result = await saveOnboarding({
         userId,
         display_name: form.display_name || email?.split('@')[0],
         weight_kg: form.weight_kg ? parseFloat(form.weight_kg) : null,
@@ -40,8 +42,14 @@ export default function OnboardingForm({ userId, email }: OnboardingProps) {
         activity_level: form.activity_level || null,
         dietary_notes: form.dietary_notes || null,
       })
-    } catch (e) {
-      setError('Gagal menyimpan data. Coba lagi.')
+      if (result?.success) {
+        router.push('/dashboard?onboarding=done')
+      } else {
+        setError(result?.error || 'Gagal menyimpan data. Coba lagi.')
+        setLoading(false)
+      }
+    } catch (e: any) {
+      setError(e.message || 'Gagal menyimpan data. Coba lagi.')
       setLoading(false)
     }
   }
@@ -50,15 +58,21 @@ export default function OnboardingForm({ userId, email }: OnboardingProps) {
     setLoading(true)
     setError('')
     try {
-      await saveOnboarding({
+      const result = await saveOnboarding({
         userId,
         display_name: email?.split('@')[0],
         weight_kg: null, height_cm: null, age: null,
         gender: null, goal: null, activity_level: null, dietary_notes: null,
         skip: true,
       })
-    } catch {
-      setError('Gagal. Coba lagi.')
+      if (result?.success) {
+        router.push('/dashboard')
+      } else {
+        setError(result?.error || 'Gagal. Coba lagi.')
+        setLoading(false)
+      }
+    } catch (e: any) {
+      setError(e.message || 'Gagal. Coba lagi.')
       setLoading(false)
     }
   }

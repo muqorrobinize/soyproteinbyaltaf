@@ -1,5 +1,6 @@
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { addApiKey, toggleApiKey, deleteApiKey } from '../actions'
+import { TestTierButton } from '@/components/admin/TestTierButton'
 
 export const dynamic = 'force-dynamic';
 
@@ -53,11 +54,19 @@ export default async function AdminKeysPage() {
                     <td className="p-4 font-bold text-green-800 dark:text-green-200">{k.name}</td>
                     <td className="p-4 text-sm text-green-800 dark:text-green-200 uppercase">{k.provider}</td>
                     <td className="p-4">
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${k.is_active ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'}`}>
-                        {k.is_active ? 'Active' : 'Inactive'}
-                      </span>
+                      <div className="flex flex-col gap-1 items-start">
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${k.is_active ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'}`}>
+                          {k.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                        {k.last_checked_tier && (
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400">
+                            {k.last_checked_tier}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-4 text-right space-x-2 whitespace-nowrap">
+                      {k.provider === 'openai' && <TestTierButton keyId={k.id} />}
                       <form action={toggleApiKey.bind(null, k.id, !k.is_active)} className="inline">
                         <button className="text-xs px-3 py-1 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-bold shadow-sm">
                           {k.is_active ? 'Disable' : 'Enable'}
