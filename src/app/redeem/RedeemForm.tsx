@@ -1,10 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { redeemCode } from './actions'
 
-const QrScanner = dynamic(() => import('@/components/QrScanner'), { ssr: false })
+const QrScanner = dynamic(() => import('@/components/QrScanner'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full py-4 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
+      Memuat scanner...
+    </div>
+  ),
+})
 
 interface RedeemFormProps {
   initialCode?: string
@@ -14,6 +22,7 @@ export default function RedeemForm({ initialCode }: RedeemFormProps) {
   const [code, setCode] = useState(initialCode || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const router = useRouter()
 
   useEffect(() => {
     if (initialCode) setCode(initialCode.toUpperCase())
@@ -28,16 +37,31 @@ export default function RedeemForm({ initialCode }: RedeemFormProps) {
     e.preventDefault()
     if (!code.trim()) return setError('Masukkan kode terlebih dahulu')
     setLoading(true)
+    setError('')
     const fd = new FormData()
     fd.append('code', code.trim().toUpperCase())
-    await redeemCode(fd)
-    setLoading(false)
+
+    try {
+      const result = await redeemCode(fd)
+      if (result?.error) {
+        setError(result.error)
+        setLoading(false)
+      } else if (result?.success) {
+        router.push('/dashboard?success=Code+redeemed+successfully!')
+      } else {
+        setError('Terjadi kesalahan. Coba lagi.')
+        setLoading(false)
+      }
+    } catch (err: any) {
+      setError(err.message || 'Terjadi kesalahan jaringan')
+      setLoading(false)
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      {/* QR Scanner */}
-      <QrScanner onScan={handleScan} />
+      {/* QR Scanner — auto-starts camera when no initial code */}
+      <QrScanner onScan={handleScan} autoStart={!initialCode} />
 
       <div className="flex items-center gap-3">
         <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />

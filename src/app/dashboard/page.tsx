@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import ChatInterface from '@/components/ChatInterface'
 import OnboardingForm from '@/components/OnboardingForm'
@@ -19,7 +18,14 @@ export default async function DashboardPage({
   const supabase = await createClient()
 
   const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) redirect('/login')
+  if (authError || !user) {
+    // Middleware should have redirected — this is a safety fallback
+    return (
+      <div className="min-h-dvh flex items-center justify-center">
+        <p style={{ color: 'var(--text-muted)' }}>Redirecting to login...</p>
+      </div>
+    )
+  }
 
   const isGenesisAdmin = user.email?.toLowerCase() === GENESIS_EMAIL.toLowerCase()
 

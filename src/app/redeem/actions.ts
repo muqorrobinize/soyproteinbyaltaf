@@ -11,12 +11,12 @@ export async function redeemCode(formData: FormData) {
   // Get current user
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) {
-    redirect('/login')
+    return { error: 'Authentication required. Please login.' }
   }
 
   const code = formData.get('code') as string
   if (!code) {
-    redirect('/redeem?error=Please enter a code')
+    return { error: 'Please enter a code' }
   }
 
   // Use service role client to bypass RLS for secure server validation
@@ -33,11 +33,11 @@ export async function redeemCode(formData: FormData) {
     .single()
 
   if (qrError || !qrData) {
-    redirect('/redeem?error=Invalid QR code')
+    return { error: 'Invalid QR code' }
   }
 
   if (qrData.status !== 'unused') {
-    redirect('/redeem?error=This code has already been used')
+    return { error: 'This code has already been used' }
   }
 
   // 2. Mark code as used
@@ -47,7 +47,7 @@ export async function redeemCode(formData: FormData) {
     .eq('code', code.toUpperCase())
 
   if (updateQrError) {
-    redirect('/redeem?error=Error redeeming code')
+    return { error: 'Error redeeming code' }
   }
 
   // 3. Update user's subscription
@@ -99,5 +99,5 @@ export async function redeemCode(formData: FormData) {
   }
 
   revalidatePath('/dashboard')
-  redirect('/dashboard?success=Code redeemed successfully!')
+  return { success: true }
 }

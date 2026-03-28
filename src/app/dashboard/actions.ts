@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 export async function logIntake() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  if (!user) return { error: 'Not authenticated' }
 
   const today = new Date().toISOString().split('T')[0]
 
