@@ -94,7 +94,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
           <div className="w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-[2.5rem] p-6 sm:p-10 shadow-xl border border-[var(--border)]">
             <h1 className="text-3xl font-black mb-2">Halo! 👋</h1>
             <p className="text-sm mb-8 opacity-60">Selesaikan profil untuk mendapatkan rencana nutrisi AI.</p>
-            <OnboardingForm userId={user.id} />
+            <OnboardingForm userId={user.id} email={user.email || ''} />
           </div>
         </div>
       )
