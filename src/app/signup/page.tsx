@@ -11,10 +11,10 @@ export default async function SignupPage({
 
   return (
     <div className="flex min-h-dvh w-full items-center justify-center flex-col px-4 relative">
-      {/* Background */}
+      {/* Background with different accent for Signup */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute top-0 left-1/4 w-72 h-72 rounded-full opacity-10 blur-[80px]" style={{ background: 'var(--accent)' }} />
-        <div className="absolute bottom-0 right-1/4 w-64 h-64 rounded-full opacity-8 blur-[60px]" style={{ background: 'var(--accent)' }} />
+        <div className="absolute top-0 right-1/4 w-72 h-72 rounded-full opacity-10 blur-[80px]" style={{ background: '#E67E22' }} />
+        <div className="absolute bottom-0 left-1/4 w-64 h-64 rounded-full opacity-8 blur-[60px]" style={{ background: '#E67E22' }} />
       </div>
 
       <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
@@ -25,24 +25,17 @@ export default async function SignupPage({
       <div className="w-full max-w-sm glass-panel p-7 flex flex-col gap-5 relative z-10 animate-slide-up">
         {/* Header */}
         <div className="text-center">
-          <div className="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-md" style={{ background: 'var(--accent)', color: '#fff' }}>
-            🍵
+          <div className="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-md bg-gradient-to-br from-[#E67E22] to-[#D35400] text-white">
+            🌱
           </div>
-          <h1 className="text-2xl font-extrabold" style={{ color: 'var(--text-primary)' }}>SoyProtein</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Buat akun untuk mulai nutrisi cerdas</p>
+          <h1 className="text-2xl font-extrabold" style={{ color: 'var(--text-primary)' }}>Join SoyProtein</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Mulai langkah awal hidup sehat hari ini</p>
         </div>
 
-        {/* Error */}
+        {/* ... existing error/message handling ... */}
         {error && (
           <div className="px-4 py-3 rounded-xl text-sm font-semibold text-center" style={{ background: 'rgba(192,57,43,0.10)', color: 'var(--danger)', border: '1px solid rgba(192,57,43,0.2)' }}>
             {error}
-          </div>
-        )}
-
-        {/* Success / info */}
-        {message && (
-          <div className="px-4 py-3 rounded-xl text-sm font-semibold text-center" style={{ background: 'rgba(77,124,95,0.12)', color: 'var(--accent)', border: '1px solid var(--border-strong)' }}>
-            {message}
           </div>
         )}
 
@@ -74,7 +67,7 @@ export default async function SignupPage({
           </div>
 
           <div className="flex flex-col gap-3 pt-1">
-            <button formAction={signup} className="btn-primary">
+            <button formAction={signup} className="btn-primary !bg-[#E67E22] hover:!bg-[#D35400] border-none">
               Daftar Sekarang
             </button>
             <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>

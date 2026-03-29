@@ -30,24 +30,47 @@ export default async function DashboardPage({
 
   const isGenesisAdmin = user.email?.toLowerCase() === GENESIS_EMAIL.toLowerCase()
 
+  // Check for the admin secret-role key before using it to prevent runtime crashes
+  const svcKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!svcKey) {
+    console.error('CRITICAL: SUPABASE_SERVICE_ROLE_KEY IS MISSING');
+    return (
+      <div className="min-h-dvh flex items-center justify-center p-4">
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Internal Server Error: Missing Configuration. Please contact support.</p>
+      </div>
+    );
+  }
+
   // Admin service client for upsert/reads
   const adminClient = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    svcKey
   )
 
-  // Ensure user row always exists (handles genesis admin + any race condition)
-  await adminClient.from('users').upsert({
-    id: user.id,
-    email: user.email,
-  }, { onConflict: 'id', ignoreDuplicates: true })
+  let profile: any = null;
+  try {
+    // Ensure user row always exists (handles genesis admin + any race condition)
+    await adminClient.from('users').upsert({
+      id: user.id,
+      email: user.email,
+    }, { onConflict: 'id', ignoreDuplicates: true })
 
-  // Fetch full profile
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+    // Fetch full profile
+    const { data, error: profileError } = await adminClient
+      .from('users')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError) {
+      console.error('Profile fetch error:', profileError);
+      // If profile is missing but we just upserted, it might be a race. Use fallback.
+    }
+    profile = data;
+  } catch (err) {
+    console.error('Dashboard Fetch Failure:', err);
+    // Continue with limited UI if profile fetch fails
+  }
 
   if (profile?.is_blocked) {
     return (

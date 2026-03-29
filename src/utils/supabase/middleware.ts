@@ -30,40 +30,29 @@ export async function updateSession(request: NextRequest) {
   // IMPORTANT: Do not run code between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
   const pathname = request.nextUrl.pathname
 
   // Routes that require authentication
   const protectedRoutes = ['/dashboard', '/admin', '/redeem']
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
 
-  // Routes that should redirect to dashboard if already logged in
+  // Routes that should redirect to dashboard if already logged in (auth gateway)
   const authRoutes = ['/login', '/signup']
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   // Not logged in → protect routes
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     
-    // CRITICAL: We MUST create a new redirect response AND copy any fresh cookies 
-    // from supabaseResponse (which might have just been refreshed).
-    const redirectResponse = NextResponse.redirect(url)
-    supabaseResponse.cookies.getAll().forEach((cookie) => {
-      redirectResponse.cookies.set(cookie.name, cookie.value, {
-        path: cookie.path,
-        domain: cookie.domain,
-        maxAge: cookie.maxAge,
-        httpOnly: cookie.httpOnly,
-        secure: cookie.secure,
-        sameSite: cookie.sameSite,
-        expires: cookie.expires,
-      })
-    })
-    return redirectResponse
+    const response = NextResponse.redirect(url)
+    // IMPORTANT: Transfer cookies from the supabaseResponse we've been building
+    supabaseResponse.cookies.getAll().forEach((c) => response.cookies.set(c.name, c.value, c))
+    return response
   }
 
   // Already logged in → bounce off auth pages to dashboard  
@@ -71,22 +60,10 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     
-    // CRITICAL: Same pattern to avoid infinite redirect loops on mobile
-    const redirectResponse = NextResponse.redirect(url)
-    supabaseResponse.cookies.getAll().forEach((cookie) => {
-      redirectResponse.cookies.set(cookie.name, cookie.value, {
-        path: cookie.path,
-        domain: cookie.domain,
-        maxAge: cookie.maxAge,
-        httpOnly: cookie.httpOnly,
-        secure: cookie.secure,
-        sameSite: cookie.sameSite,
-        expires: cookie.expires,
-      })
-    })
-    return redirectResponse
+    const response = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach((c) => response.cookies.set(c.name, c.value, c))
+    return response
   }
 
-  // IMPORTANT: You *must* return the supabaseResponse object as-is.
   return supabaseResponse
 }
