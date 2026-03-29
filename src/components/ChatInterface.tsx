@@ -110,7 +110,7 @@ export default function ChatInterface({ autoPrompt }: ChatInterfaceProps) {
           />
           <button
             type="submit"
-            disabled={isLoading || !input.trim()}
+            disabled={isLoading || !input?.trim()}
             className="btn-primary !w-auto !px-4 !py-3 !rounded-2xl shrink-0"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
