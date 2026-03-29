@@ -11,7 +11,7 @@ export default function ChatInterface({ autoPrompt }: ChatInterfaceProps) {
   const [autoSent, setAutoSent] = useState(false)
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
-  const { messages, input, handleInputChange, handleSubmit, isLoading, append } = useChat({
+  const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, append } = useChat({
     api: '/api/chat',
   } as any)
 
@@ -45,10 +45,7 @@ export default function ChatInterface({ autoPrompt }: ChatInterfaceProps) {
               {['Berapa protein yang saya butuhkan?', 'Buat meal plan untuk bulking', 'Tips konsistensi gym'].map(suggestion => (
                 <button
                   key={suggestion}
-                  onClick={() => {
-                    const input = document.querySelector('[data-chat-input]') as HTMLInputElement
-                    if (input) { input.value = suggestion; input.dispatchEvent(new Event('input', { bubbles: true })) }
-                  }}
+                  onClick={() => append({ role: 'user', content: suggestion })}
                   className="text-xs px-3 py-1.5 rounded-full font-medium transition-all"
                   style={{ background: 'var(--surface-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
                 >

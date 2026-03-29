@@ -67,6 +67,7 @@ export default function OnboardingForm({ userId, email }: OnboardingProps) {
       })
       if (result?.success) {
         router.push('/dashboard')
+        router.refresh()
       } else {
         setError(result?.error || 'Gagal. Coba lagi.')
         setLoading(false)

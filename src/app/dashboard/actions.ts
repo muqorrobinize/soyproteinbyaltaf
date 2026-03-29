@@ -3,53 +3,59 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function logIntake() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
+export async function toggleDailyTask(itemIndex: number, currentProgress: number[]) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Unauthorized')
 
-  const today = new Date().toISOString().split('T')[0]
+    let newProgress = [...currentProgress]
+    if (newProgress.includes(itemIndex)) {
+      newProgress = newProgress.filter(i => i !== itemIndex)
+    } else {
+      newProgress.push(itemIndex)
+    }
 
-  // Check if already logged today
-  const { data: existing } = await supabase
-    .from('tracking')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('tracked_date', today)
-    .single()
+    const { error } = await supabase
+      .from('users')
+      .update({ 
+        daily_progress: newProgress,
+        last_activity_date: new Date().toISOString().split('T')[0]
+      })
+      .eq('id', user.id)
 
-  if (existing) {
-    return { already: true }
+    if (error) throw error
+
+    revalidatePath('/dashboard')
+    return { success: true, progress: newProgress }
+  } catch (e: any) {
+    return { success: false, error: e.message }
   }
+}
 
-  // Insert tracking entry
-  await supabase.from('tracking').insert({
-    user_id: user.id,
-    tracked_date: today,
-    intake_logged: true,
-  })
+export async function updateProfile(data: {
+  display_name: string
+  weight_kg: number | null
+  height_cm: number | null
+  age: number | null
+  goal: string | null
+  activity_level: string | null
+}) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Unauthorized')
 
-  // Update streak
-  const yesterday = new Date()
-  yesterday.setDate(yesterday.getDate() - 1)
-  const yesterdayStr = yesterday.toISOString().split('T')[0]
+    const { error } = await supabase
+      .from('users')
+      .update(data)
+      .eq('id', user.id)
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('streak_count, last_tracked_date')
-    .eq('id', user.id)
-    .single()
+    if (error) throw error
 
-  let newStreak = 1
-  if (profile?.last_tracked_date === yesterdayStr) {
-    newStreak = (profile.streak_count || 0) + 1
+    revalidatePath('/dashboard')
+    return { success: true }
+  } catch (e: any) {
+    return { success: false, error: e.message }
   }
-
-  await supabase.from('users').update({
-    streak_count: newStreak,
-    last_tracked_date: today,
-  }).eq('id', user.id)
-
-  revalidatePath('/dashboard')
-  return { success: true, streak: newStreak }
 }

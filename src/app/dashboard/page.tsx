@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import OnboardingForm from '@/components/OnboardingForm'
 import ChatInterface from '@/components/ChatInterface'
+import ProfileView from '@/components/ProfileView'
 import TrackingWidget from '@/components/TrackingWidget'
 import ScheduleWidget from '@/components/ScheduleWidget'
 
@@ -114,19 +115,58 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
       )
     }
 
+    const tab = (await searchParams).tab || 'chat'
+    const todayStr = new Date().toISOString().split('T')[0]
+    let dailyProgress = profile?.daily_progress || []
+
+    // Daily Reset Logic
+    if (profile?.last_activity_date !== todayStr) {
+      dailyProgress = []
+      // We don't need to await this as it will update on next interaction, 
+      // but showing it as empty for the UI immediately
+    }
+
     const autoPrompt = onboarding === 'done' && profile?.goal
       ? `Buatkan rencana nutrisi untuk: ${profile.goal}. Berat: ${profile.weight_kg}kg.`
       : undefined
 
     return (
       <div className="flex flex-col min-h-[calc(100vh-64px)] px-4 py-2 sm:px-6 sm:py-4">
+        {/* Tab Switcher */}
+        <div className="flex bg-zinc-100 dark:bg-zinc-800/50 p-1.5 rounded-2xl w-full max-w-sm mx-auto mb-6 border border-[var(--border)]">
+          <Link 
+            href="/dashboard?tab=chat" 
+            className={`flex-1 text-center py-2 rounded-xl text-sm font-bold transition-all ${tab === 'chat' ? 'bg-white dark:bg-zinc-700 shadow-sm text-[var(--accent)]' : 'text-zinc-500'}`}
+          >
+            💬 Chat
+          </Link>
+          <Link 
+            href="/dashboard?tab=profile" 
+            className={`flex-1 text-center py-2 rounded-xl text-sm font-bold transition-all ${tab === 'profile' ? 'bg-white dark:bg-zinc-700 shadow-sm text-[var(--accent)]' : 'text-zinc-500'}`}
+          >
+            👤 Profile
+          </Link>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 flex-1 min-h-0 overflow-hidden">
+          {/* Main View */}
           <div className="lg:col-span-8 xl:col-span-9 flex flex-col glass-panel overflow-hidden border border-[var(--border)]">
-            <ChatInterface autoPrompt={autoPrompt} />
+            {tab === 'profile' ? (
+              <ProfileView profile={profile} />
+            ) : (
+              <ChatInterface autoPrompt={autoPrompt} />
+            )}
           </div>
+
+          {/* Sidebar */}
           <div className="lg:col-span-4 xl:col-span-3 space-y-4 lg:space-y-6 overflow-y-auto pr-1 hidden lg:block custom-scroll">
             <TrackingWidget />
-            <ScheduleWidget weightKg={profile?.weight_kg} goal={profile?.goal} streakCount={profile?.streak_count} />
+            <ScheduleWidget 
+              weightKg={profile?.weight_kg} 
+              goal={profile?.goal} 
+              streakCount={profile?.streak_count} 
+              dailyProgress={dailyProgress}
+            />
           </div>
         </div>
       </div>
