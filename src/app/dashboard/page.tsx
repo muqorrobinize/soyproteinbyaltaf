@@ -1,11 +1,22 @@
+import { createServerClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/server'
-import { createServiceClient } from '@/utils/supabase/service'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import OnboardingForm from '@/components/OnboardingForm'
 import ChatInterface from '@/components/ChatInterface'
 import TrackingWidget from '@/components/TrackingWidget'
 import ScheduleWidget from '@/components/ScheduleWidget'
+
+// Local Service Client Creator (no extra file needed)
+function createServiceClient(url: string, key: string) {
+  return createSupabaseClient(url, key, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  })
+}
 
 export default async function DashboardPage({ searchParams }: { searchParams: any }) {
   try {
@@ -75,7 +86,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
     const isAdmin = isGenesisAdmin || profile?.role === 'admin'
     const isSubscribed = isAdmin || (subscriptionEnd && subscriptionEnd > new Date())
 
-    // Onboarding Redirect
+    // Onboarding View
     if (!profile?.onboarding_complete && onboarding !== 'skip') {
       return (
         <div className="container-page py-6 sm:py-10 flex flex-col items-center">
@@ -88,7 +99,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
       )
     }
 
-    // Subscription Check
+    // Subscription View
     if (!isSubscribed) {
       return (
         <div className="container-page py-10 flex flex-col items-center text-center max-w-lg mx-auto">
@@ -122,7 +133,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
     )
   } catch (criticalError) {
     console.error('EXTERNAL CRASH DETECTED:', criticalError)
-    // SAFE MODE: Return a stable UI if anything above crashes
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] px-6 text-center">
         <div className="w-20 h-20 bg-red-100 dark:bg-red-900/10 rounded-full flex items-center justify-center text-4xl mb-6">🛡️</div>
