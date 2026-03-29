@@ -1,5 +1,4 @@
 import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import RedeemForm from './RedeemForm'
@@ -15,10 +14,20 @@ export default async function RedeemPage({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Middleware should redirect unauthenticated users — this is a safety fallback
   if (!user) {
-    // Preserve code in login redirect
-    const loginUrl = code ? `/login?message=Login+terlebih+dahulu+untuk+redeem` : '/login'
-    redirect(loginUrl)
+    return (
+      <div className="flex min-h-dvh w-full items-center justify-center flex-col px-4 relative">
+        <div className="w-full max-w-sm glass-panel p-7 flex flex-col gap-5 relative z-10 text-center">
+          <div className="text-4xl mb-2">🔒</div>
+          <h1 className="text-xl font-extrabold" style={{ color: 'var(--text-primary)' }}>Login Diperlukan</h1>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Silakan login terlebih dahulu untuk redeem kode produk.</p>
+          <Link href={code ? `/login?message=Login+terlebih+dahulu+untuk+redeem` : '/login'} className="btn-primary">
+            Masuk
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (

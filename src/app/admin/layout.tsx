@@ -1,17 +1,46 @@
 import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Users, QrCode, KeyRound, LayoutDashboard, BookOpen, ArrowLeft, Brain } from 'lucide-react'
 
+const GENESIS_EMAIL = 'muqorroben@gmail.com'
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  
+  // Middleware already redirects unauthenticated users — safety fallback only
+  if (!user) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center">
+        <p style={{ color: 'var(--text-muted)' }}>Redirecting to login...</p>
+      </div>
+    )
+  }
 
-  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin' && user.email !== 'muqorroben@gmail.com') {
-    redirect('/dashboard')
+  // Use service role to bypass RLS for role check
+  const adminClient = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const { data: profile } = await adminClient.from('users').select('role').eq('id', user.id).single()
+  
+  const isAdmin = profile?.role === 'admin' || user.email?.toLowerCase() === GENESIS_EMAIL.toLowerCase()
+  
+  if (!isAdmin) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center p-4">
+        <div className="glass-panel p-8 text-center max-w-sm">
+          <div className="text-4xl mb-4">🚫</div>
+          <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--danger)' }}>Akses Ditolak</h2>
+          <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>Kamu tidak memiliki akses ke panel admin.</p>
+          <Link href="/dashboard" className="btn-primary !w-auto !px-6 !rounded-xl inline-block">
+            ← Kembali ke Dashboard
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   const navItems = [
@@ -26,9 +55,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 glass border-r border-green-200/50 dark:border-green-800/50 flex flex-col z-50">
-        <div className="p-6 border-b border-green-200/50 dark:border-green-800/50 flex justify-between items-center">
-          <h2 className="text-xl font-extrabold text-green-800 dark:text-green-200 flex items-center gap-2">
+      <aside className="w-full md:w-64 glass flex flex-col z-50" style={{ borderRight: '1px solid var(--border)' }}>
+        <div className="p-6 flex justify-between items-center" style={{ borderBottom: '1px solid var(--border)' }}>
+          <h2 className="text-xl font-extrabold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <span>🛡️</span> Admin Panel
           </h2>
           <ThemeToggle />
@@ -39,7 +68,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link 
               key={item.href} 
               href={item.href}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-green-900 dark:text-green-100 hover:bg-green-100/50 dark:hover:bg-green-900/50 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-colors"
+              style={{ color: 'var(--text-primary)' }}
             >
               <item.icon className="w-5 h-5" />
               {item.name}
@@ -47,8 +77,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           ))}
         </nav>
 
-        <div className="p-4 border-t border-green-200/50 dark:border-green-800/50 flex gap-2 flex-col">
-          <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-green-800/70 hover:bg-green-100/50 dark:text-green-200/70 dark:hover:bg-green-900/50 transition-colors">
+        <div className="p-4" style={{ borderTop: '1px solid var(--border)' }}>
+          <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-colors" style={{ color: 'var(--text-muted)' }}>
             <ArrowLeft className="w-5 h-5" />
             Back to App
           </Link>
