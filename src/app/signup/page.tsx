@@ -1,8 +1,8 @@
-import { login } from './actions'
+import { signup } from '../login/actions'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import Link from 'next/link'
 
-export default async function LoginPage({
+export default async function SignupPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string; message?: string }>
@@ -29,19 +29,19 @@ export default async function LoginPage({
             🍵
           </div>
           <h1 className="text-2xl font-extrabold" style={{ color: 'var(--text-primary)' }}>SoyProtein</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Masuk ke akun nutrition coach kamu</p>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Buat akun untuk mulai nutrisi cerdas</p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="px-4 py-3 rounded-xl text-sm font-semibold text-center" style={{ background: 'rgba(192, 57, 43, 0.10)', color: 'var(--danger)', border: '1px solid rgba(192, 57, 43, 0.2)' }}>
+          <div className="px-4 py-3 rounded-xl text-sm font-semibold text-center" style={{ background: 'rgba(192,57,43,0.10)', color: 'var(--danger)', border: '1px solid rgba(192,57,43,0.2)' }}>
             {error}
           </div>
         )}
 
         {/* Success / info */}
         {message && (
-          <div className="px-4 py-3 rounded-xl text-sm font-semibold text-center" style={{ background: 'rgba(77, 124, 95, 0.12)', color: 'var(--accent)', border: '1px solid var(--border-strong)' }}>
+          <div className="px-4 py-3 rounded-xl text-sm font-semibold text-center" style={{ background: 'rgba(77,124,95,0.12)', color: 'var(--accent)', border: '1px solid var(--border-strong)' }}>
             {message}
           </div>
         )}
@@ -67,27 +67,27 @@ export default async function LoginPage({
               name="password"
               type="password"
               required
-              autoComplete="current-password"
+              autoComplete="new-password"
               className="input-field"
-              placeholder="••••••"
+              placeholder="Min. 6 karakter"
             />
           </div>
 
           <div className="flex flex-col gap-3 pt-1">
-            <button formAction={login} className="btn-primary">
-              Masuk
+            <button formAction={signup} className="btn-primary">
+              Daftar Sekarang
             </button>
             <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
-              Belum punya akun? {' '}
-              <Link href="/signup" className="font-bold underline" style={{ color: 'var(--accent)' }}>
-                Daftar di sini
+              Sudah punya akun? {' '}
+              <Link href="/login" className="font-bold underline" style={{ color: 'var(--accent)' }}>
+                Masuk di sini
               </Link>
             </p>
           </div>
         </form>
 
         <p className="text-xs text-center leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-          Dengan masuk, kamu menyetujui penggunaan platform untuk keperluan nutrisi pribadi.
+          Dengan mendaftar, kamu menyetujui penggunaan platform untuk keperluan nutrisi pribadi.
         </p>
       </div>
     </div>

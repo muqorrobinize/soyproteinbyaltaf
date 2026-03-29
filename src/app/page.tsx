@@ -49,50 +49,64 @@ export default function Home() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md mx-auto">
-          <Link href="/login" className="btn-primary !rounded-2xl !py-4 text-base shadow-lg">
+          <Link href="/signup" className="btn-primary !rounded-2xl !py-4 text-base shadow-lg">
             Mulai Perjalanan
           </Link>
         </div>
       </main>
 
       {/* The Products Showcase */}
-      <section className="relative z-10 py-16 px-6 border-t" style={{ borderColor: 'var(--border)', background: 'var(--surface-hover)' }}>
+      <section className="relative z-10 py-24 px-6 border-t" style={{ borderColor: 'var(--border)', background: 'var(--surface-hover)' }}>
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-extrabold mb-4" style={{ color: 'var(--text-primary)' }}>Dua Cara, Satu Tujuan</h2>
-            <p className="max-w-xl mx-auto text-sm sm:text-base" style={{ color: 'var(--text-muted)' }}>Setiap kemasan dilengkapi dengan QR Code untuk mengaktifkan AI Nutrition Coach Anda.</p>
+          <div className="text-center mb-16 px-4">
+            <h2 className="text-3xl sm:text-5xl font-black mb-6 tracking-tight" style={{ color: 'var(--text-primary)' }}>Pilih Produk, Aktifkan Coach.</h2>
+            <p className="max-w-2xl mx-auto text-base sm:text-lg leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+              Setiap kemasan SoyProtein membawa Anda satu langkah lebih dekat ke target fisik ideal Anda.
+              Scan QR Code unik di setiap botol atau pouch untuk membuka akses AI Nutritionist eksklusif.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+          <div className="grid md:grid-cols-2 gap-10 lg:gap-14">
             {/* Susu Kedelai */}
-            <div className="glass-panel p-8 sm:p-10 flex flex-col transition-transform hover:-translate-y-1 duration-300">
-               <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-6" style={{ background: 'rgba(86,196,122,0.15)' }}>🥛</div>
-               <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>Susu Kedelai</h3>
-               <p className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: 'var(--accent)' }}>Kesegaran Maksimal & Praktis</p>
-               <p className="leading-relaxed mb-6 flex-1" style={{ color: 'var(--text-secondary)' }}>
-                 Susu kedelai cair segar yang siap minum. Sangat cocok untuk sarapan cepat, penambah energi instan, dan menjaga hidrasi aktif sepanjang hari.
+            <div className="glass-panel p-8 sm:p-12 flex flex-col group transition-all duration-500 hover:shadow-glow hover:-translate-y-2 relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent)] opacity-[0.03] rounded-bl-full group-hover:opacity-10 transition-opacity" />
+               <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-8 shadow-inner" style={{ background: 'rgba(77,124,95,0.08)' }}>🥛</div>
+               <h3 className="text-3xl font-black mb-4" style={{ color: 'var(--text-primary)' }}>Susu Kedelai</h3>
+               <p className="text-sm font-extrabold uppercase tracking-[0.2em] mb-6" style={{ color: 'var(--accent)' }}>Energy & Hydration</p>
+               <p className="text-lg leading-relaxed mb-8 flex-1 font-medium" style={{ color: 'var(--text-secondary)' }}>
+                 Kesegaran murni siap minum. Diformulasikan untuk sarapan yang ringan namun mengenyangkan, atau sebagai asupan protein instan saat Anda sedang di tengah kesibukan.
                </p>
-               <ul className="space-y-3 mt-auto border-t pt-6" style={{ borderColor: 'var(--border)' }}>
-                 <li className="flex items-center gap-3 text-sm font-medium" style={{ color: 'var(--text-primary)' }}><span className="text-[var(--accent)]">✓</span> Kaya protein murni</li>
-                 <li className="flex items-center gap-3 text-sm font-medium" style={{ color: 'var(--text-primary)' }}><span className="text-[var(--accent)]">✓</span> Rendah kalori & gula</li>
-                 <li className="flex items-center gap-3 text-sm font-medium" style={{ color: 'var(--text-primary)' }}><span className="text-[var(--accent)]">✓</span> Asupan instan kapan saja</li>
-               </ul>
+               <div className="space-y-4 mt-auto">
+                 <div className="flex items-center gap-4 text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                   <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] bg-[var(--accent)] text-white">✓</span> 
+                   Rendah Gula & Tinggi Serat
+                 </div>
+                 <div className="flex items-center gap-4 text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                   <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] bg-[var(--accent)] text-white">✓</span> 
+                   Tanpa Pengental Buatan
+                 </div>
+               </div>
             </div>
 
             {/* Bubuk Kedelai */}
-            <div className="glass-panel p-8 sm:p-10 flex flex-col transition-transform hover:-translate-y-1 duration-300 relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent)] opacity-5 rounded-bl-full" />
-               <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-6" style={{ background: 'rgba(230,126,34,0.15)' }}>🌾</div>
-               <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>Bubuk Kedelai</h3>
-               <p className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: 'var(--warning)' }}>Protein Tinggi & Fleksibel</p>
-               <p className="leading-relaxed mb-6 flex-1" style={{ color: 'var(--text-secondary)' }}>
-                 Bubuk kedelai premium dengan konsentrasi protein tinggi. Solusi tahan lama yang sempurna untuk racikan post-workout shake atau campuran masakan sehat.
+            <div className="glass-panel p-8 sm:p-12 flex flex-col group transition-all duration-500 hover:shadow-lg hover:-translate-y-2 relative overflow-hidden bg-gradient-to-br from-[var(--surface)] to-transparent">
+               <div className="absolute -top-4 -right-4 w-40 h-40 bg-[var(--warning)] opacity-[0.03] rounded-full group-hover:opacity-10 transition-opacity" />
+               <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-8 shadow-inner" style={{ background: 'rgba(230,126,34,0.08)' }}>🌾</div>
+               <h3 className="text-3xl font-black mb-4" style={{ color: 'var(--text-primary)' }}>Bubuk Kedelai</h3>
+               <p className="text-sm font-extrabold uppercase tracking-[0.2em] mb-6" style={{ color: 'var(--warning)' }}>Strength & Recovery</p>
+               <p className="text-lg leading-relaxed mb-8 flex-1 font-medium" style={{ color: 'var(--text-secondary)' }}>
+                 Konsentrat protein tinggi untuk performa puncak. Pilihan fleksibel bagi Anda yang serius dengan progress gym (bulking/cutting) atau ingin simpanan protein jangka panjang.
                </p>
-               <ul className="space-y-3 mt-auto border-t pt-6" style={{ borderColor: 'var(--border)' }}>
-                 <li className="flex items-center gap-3 text-sm font-medium" style={{ color: 'var(--text-primary)' }}><span className="text-[var(--warning)]">✓</span> Awet & mudah disimpan</li>
-                 <li className="flex items-center gap-3 text-sm font-medium" style={{ color: 'var(--text-primary)' }}><span className="text-[var(--warning)]">✓</span> Cocok untuk bulking/cutting</li>
-                 <li className="flex items-center gap-3 text-sm font-medium" style={{ color: 'var(--text-primary)' }}><span className="text-[var(--warning)]">✓</span> Mudah dicampur bahan lain</li>
-               </ul>
+               <div className="space-y-4 mt-auto">
+                 <div className="flex items-center gap-4 text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                   <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] bg-[var(--warning)] text-white">✓</span> 
+                   25g+ Protein per Serving
+                 </div>
+                 <div className="flex items-center gap-4 text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                   <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] bg-[var(--warning)] text-white">✓</span> 
+                   Mudah Di-blend & Tahan Lama
+                 </div>
+               </div>
             </div>
           </div>
         </div>

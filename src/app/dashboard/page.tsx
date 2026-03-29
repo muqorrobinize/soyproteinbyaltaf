@@ -6,6 +6,7 @@ import OnboardingForm from '@/components/OnboardingForm'
 import TrackingWidget from '@/components/TrackingWidget'
 import ScheduleWidget from '@/components/ScheduleWidget'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { ClaimTrialButton } from '@/components/ClaimTrialButton'
 
 const GENESIS_EMAIL = 'muqorroben@gmail.com'
 
@@ -190,15 +191,27 @@ export default async function DashboardPage({
             </div>
           </div>
         ) : (
-          <div className="flex-1 glass-panel flex flex-col items-center justify-center py-16 text-center px-6">
-            <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-6 shadow-lg" style={{ background: 'var(--surface-hover)', border: '2px solid var(--border-strong)' }}>🔒</div>
-            <h2 className="text-xl font-extrabold mb-2" style={{ color: 'var(--text-primary)' }}>Akses Terkunci</h2>
-            <p className="text-sm mb-6 max-w-xs" style={{ color: 'var(--text-muted)' }}>
-              Scan QR pada kemasan produk SoyProtein untuk mengaktifkan AI Coach dan Jadwal Harian.
+          <div className="flex-1 glass-panel flex flex-col items-center justify-center py-16 text-center px-6 transition-all animate-fade-in">
+            <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-8 shadow-lg bg-surface-hover border-[3px]" style={{ borderColor: 'var(--border-strong)' }}>🔒</div>
+            <h2 className="text-2xl font-extrabold mb-3" style={{ color: 'var(--text-primary)' }}>Akses Coach Terkunci</h2>
+            <p className="text-sm mb-10 max-w-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+              AI Nutrition Coach saat ini tidak aktif. Anda memerlukan langganan aktif untuk berkonsultasi mengenai diet dan jadwal harian.
             </p>
-            <Link href="/redeem" className="btn-primary !w-auto !px-8 !rounded-2xl">
-              🎁 Redeem Code
-            </Link>
+            
+            <div className="flex flex-col sm:flex-row gap-4 items-center mb-8">
+              <Link href="/redeem" className="btn-primary !w-auto !px-10 !rounded-2xl shadow-lg">
+                🎁 Redeem Code Produk
+              </Link>
+              {!profile?.trial_claimed && (
+                <ClaimTrialButton userId={user.id} />
+              )}
+            </div>
+
+            <div className="pt-8 border-t w-full max-w-xs" style={{ borderColor: 'var(--border)' }}>
+              <p className="text-[10px] font-extrabold uppercase tracking-widest leading-loose" style={{ color: 'var(--text-muted)' }}>
+                Info: Scan QR pada kemasan Susu atau Bubuk SoyProtein untuk akses premium selamanya.
+              </p>
+            </div>
           </div>
         )}
       </main>

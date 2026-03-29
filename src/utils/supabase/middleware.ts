@@ -41,21 +41,50 @@ export async function updateSession(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
 
   // Routes that should redirect to dashboard if already logged in
-  const authRoutes = ['/login']
+  const authRoutes = ['/login', '/signup']
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
 
   // Not logged in → protect routes
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    return NextResponse.redirect(url)
+    
+    // CRITICAL: We MUST create a new redirect response AND copy any fresh cookies 
+    // from supabaseResponse (which might have just been refreshed).
+    const redirectResponse = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, {
+        path: cookie.path,
+        domain: cookie.domain,
+        maxAge: cookie.maxAge,
+        httpOnly: cookie.httpOnly,
+        secure: cookie.secure,
+        sameSite: cookie.sameSite,
+        expires: cookie.expires,
+      })
+    })
+    return redirectResponse
   }
 
   // Already logged in → bounce off auth pages to dashboard  
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
+    
+    // CRITICAL: Same pattern to avoid infinite redirect loops on mobile
+    const redirectResponse = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, {
+        path: cookie.path,
+        domain: cookie.domain,
+        maxAge: cookie.maxAge,
+        httpOnly: cookie.httpOnly,
+        secure: cookie.secure,
+        sameSite: cookie.sameSite,
+        expires: cookie.expires,
+      })
+    })
+    return redirectResponse
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as-is.
