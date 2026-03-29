@@ -11,14 +11,14 @@ export default async function SignupPage({
 
   return (
     <div className="flex min-h-dvh w-full items-center justify-center flex-col px-4 relative">
-      {/* Background with different accent for Signup */}
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute top-0 right-1/4 w-72 h-72 rounded-full opacity-10 blur-[80px]" style={{ background: '#E67E22' }} />
-        <div className="absolute bottom-0 left-1/4 w-64 h-64 rounded-full opacity-8 blur-[60px]" style={{ background: '#E67E22' }} />
+      {/* Background with Sunrise accent for Signup */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-[10%] -right-[10%] w-[50%] h-[50%] rounded-full opacity-10 blur-[100px]" style={{ background: '#E67E22' }} />
+        <div className="absolute -bottom-[10%] -left-[10%] w-[40%] h-[40%] rounded-full opacity-8 blur-[80px]" style={{ background: '#E67E22' }} />
       </div>
 
       <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
-        <Link href="/" className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>← Home</Link>
+        <Link href="/" className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>← Beranda</Link>
         <ThemeToggle />
       </div>
 
@@ -28,8 +28,8 @@ export default async function SignupPage({
           <div className="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-md bg-gradient-to-br from-[#E67E22] to-[#D35400] text-white">
             🌱
           </div>
-          <h1 className="text-2xl font-extrabold" style={{ color: 'var(--text-primary)' }}>Join SoyProtein</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Mulai langkah awal hidup sehat hari ini</p>
+          <h1 className="text-2xl font-extrabold" style={{ color: 'var(--text-primary)' }}>Mulai Hidup Sehat</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Gabung bersama komunitas SoyProtein</p>
         </div>
 
         {/* ... existing error/message handling ... */}

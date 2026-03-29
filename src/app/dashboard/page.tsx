@@ -49,27 +49,35 @@ export default async function DashboardPage({
 
   let profile: any = null;
   try {
-    // Ensure user row always exists (handles genesis admin + any race condition)
+    // Ensure user row exists with minimal data if missing
     await adminClient.from('users').upsert({
       id: user.id,
       email: user.email,
     }, { onConflict: 'id', ignoreDuplicates: true })
 
-    // Fetch full profile
-    const { data, error: profileError } = await adminClient
+    // SAFE FETCH: Use .limit(1) instead of .single() to prevent 500 errors if results are missing
+    const { data: profiles, error: profileError } = await adminClient
       .from('users')
       .select('*')
       .eq('id', user.id)
-      .single()
+      .limit(1)
 
     if (profileError) {
-      console.error('Profile fetch error:', profileError);
-      // If profile is missing but we just upserted, it might be a race. Use fallback.
+      console.error('Safe Fetch Error:', profileError);
     }
-    profile = data;
+    
+    // Use the first record or a fallback profile
+    profile = profiles && profiles.length > 0 ? profiles[0] : { 
+      id: user.id, 
+      email: user.email, 
+      onboarding_complete: false,
+      is_blocked: false,
+      role: 'user'
+    };
   } catch (err) {
-    console.error('Dashboard Fetch Failure:', err);
-    // Continue with limited UI if profile fetch fails
+    console.error('Fatal Dashboard Crash Avoided:', err);
+    // Ultimate fallback for crash-free rendering
+    profile = { id: user.id, email: user.email, onboarding_complete: false };
   }
 
   if (profile?.is_blocked) {

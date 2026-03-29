@@ -11,25 +11,25 @@ export default async function LoginPage({
 
   return (
     <div className="flex min-h-dvh w-full items-center justify-center flex-col px-4 relative">
-      {/* Background */}
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute top-0 left-1/4 w-72 h-72 rounded-full opacity-10 blur-[80px]" style={{ background: 'var(--accent)' }} />
-        <div className="absolute bottom-0 right-1/4 w-64 h-64 rounded-full opacity-8 blur-[60px]" style={{ background: 'var(--accent)' }} />
+      {/* Background with Matcha accent for Login */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full opacity-10 blur-[100px]" style={{ background: 'var(--accent)' }} />
+        <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] rounded-full opacity-8 blur-[80px]" style={{ background: 'var(--accent)' }} />
       </div>
 
       <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
-        <Link href="/" className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>← Home</Link>
+        <Link href="/" className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>← Beranda</Link>
         <ThemeToggle />
       </div>
 
       <div className="w-full max-w-sm glass-panel p-7 flex flex-col gap-5 relative z-10 animate-slide-up">
         {/* Header */}
         <div className="text-center">
-          <div className="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-md" style={{ background: 'var(--accent)', color: '#fff' }}>
+          <div className="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-md bg-gradient-to-br from-[#4D7C5F] to-[#3A5F48] text-white">
             🍵
           </div>
-          <h1 className="text-2xl font-extrabold" style={{ color: 'var(--text-primary)' }}>SoyProtein</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Masuk ke akun nutrition coach kamu</p>
+          <h1 className="text-2xl font-extrabold" style={{ color: 'var(--text-primary)' }}>Selamat Datang Kembali</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Lanjutkan perjalanan nutrisi kamu</p>
         </div>
 
         {/* Error */}
