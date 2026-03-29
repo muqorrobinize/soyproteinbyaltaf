@@ -10,25 +10,21 @@ export default async function LoginPage({
   const { error, message } = await searchParams
 
   return (
-    <div className="flex min-h-dvh w-full items-center justify-center flex-col px-4 relative bg-[#FDFDFD] dark:bg-[#0A0A0A]">
-      {/* Subtle Matcha Gradient */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[radial-gradient(circle_at_center,_var(--accent)_0%,_transparent_70%)]" />
-      </div>
-
+    <div className="flex min-h-dvh w-full items-center justify-center flex-col px-4 relative bg-white text-zinc-900">
+      {/* Light Clean Background */}
       <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
-        <Link href="/" className="text-sm font-bold opacity-60 hover:opacity-100 transition-opacity">← Beranda</Link>
+        <Link href="/" className="text-sm font-bold text-zinc-400 hover:text-zinc-900 transition-colors">← Beranda</Link>
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-[380px] flex flex-col gap-8 relative z-10 animate-fade-in">
-        {/* Minimal Header */}
-        <div className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 rounded-full flex items-center justify-center text-xl shadow-sm border border-[var(--border)] bg-white dark:bg-zinc-900">
+      <div className="w-full max-w-[360px] flex flex-col gap-10 relative z-10 animate-fade-in py-12">
+        {/* Minimalist Header */}
+        <div className="text-center space-y-3">
+          <div className="mx-auto w-12 h-12 rounded-full flex items-center justify-center text-xl bg-zinc-50 border border-zinc-100 shadow-sm">
             🍵
           </div>
-          <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>Lanjutkan Langkahmu</h1>
-          <p className="text-xs font-medium uppercase tracking-widest opacity-40">Selamat Datang Kembali</p>
+          <h1 className="text-3xl font-black tracking-tight text-zinc-950">Lanjutkan Sehatmu</h1>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Masuk ke Akun Anda</p>
         </div>
 
         {error && (

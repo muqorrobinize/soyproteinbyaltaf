@@ -33,25 +33,29 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const pathname = request.nextUrl.pathname
-  const protectedRoutes = ['/dashboard', '/admin', '/redeem']
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
-  const authRoutes = ['/login', '/signup']
-  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
+  try {
+    const pathname = request.nextUrl.pathname
+    const protectedRoutes = ['/dashboard', '/admin', '/redeem']
+    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+    const authRoutes = ['/login', '/signup']
+    const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
 
-  // SAFELY check user - this refreshes session if needed
-  const { data: { user } } = await supabase.auth.getUser()
+    // SAFELY check user - this refreshes session if needed
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user && isProtectedRoute) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
-  }
+    if (!user && isProtectedRoute) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
 
-  if (user && isAuthRoute) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
+    if (user && isAuthRoute) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
+  } catch (error) {
+    console.error('Middleware Critical Error Handled:', error)
   }
 
   return response

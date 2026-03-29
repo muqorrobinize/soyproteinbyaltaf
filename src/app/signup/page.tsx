@@ -10,29 +10,22 @@ export default async function SignupPage({
   const { error, message } = await searchParams
 
   return (
-    <div className="flex min-h-dvh w-full items-center justify-center flex-col px-4 relative bg-[#FFF8F3] dark:bg-[#0F0A05]">
-      {/* Dynamic Sunrise Background */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full opacity-20 blur-[120px]" style={{ background: '#E67E22' }} />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full opacity-10 blur-[80px]" style={{ background: '#E67E22' }} />
-      </div>
-
+    <div className="flex min-h-dvh w-full items-center justify-center flex-col px-4 relative bg-[#09090B] text-white">
+      {/* Dark Bold Background */}
       <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
-        <Link href="/" className="text-sm font-bold opacity-60 hover:opacity-100 transition-opacity">← Beranda</Link>
+        <Link href="/" className="text-sm font-bold text-zinc-600 hover:text-white transition-colors">← Beranda</Link>
         <ThemeToggle />
       </div>
 
       <div className="w-full max-w-[420px] relative z-10 animate-slide-up">
-        <div className="glass-panel p-8 sm:p-10 flex flex-col gap-8 shadow-2xl border-2 border-white/20 dark:border-white/5 bg-white/40 dark:bg-black/40 backdrop-blur-xl rounded-[2.5rem]">
-          {/* Welcoming Header */}
+        <div className="bg-zinc-900 border border-zinc-800 p-8 sm:p-12 flex flex-col gap-10 rounded-[3rem] shadow-2xl">
+          {/* Bold Signup Header */}
           <div className="text-center space-y-3">
-            <div className="mx-auto w-16 h-16 rounded-[1.5rem] flex items-center justify-center text-3xl shadow-xl bg-gradient-to-br from-[#E67E22] to-[#D35400] text-white rotate-3">
+            <div className="mx-auto w-16 h-16 rounded-3xl flex items-center justify-center text-3xl bg-gradient-to-br from-orange-500 to-red-600 shadow-lg shadow-orange-500/20">
               🌱
             </div>
-            <div>
-              <h1 className="text-3xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>Gabung Sekarang</h1>
-              <p className="text-xs font-bold uppercase tracking-widest opacity-50 mt-1">Mulai Hidup Sehatmu</p>
-            </div>
+            <h1 className="text-3xl font-black tracking-tight">Buat Akun Baru</h1>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Mulai Perjalanan Nutrisi</p>
           </div>
 
           {error && (
