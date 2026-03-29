@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useTransition } from 'react'
 import { toggleDailyTask } from '@/app/dashboard/actions'
 
