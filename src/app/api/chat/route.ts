@@ -1,14 +1,14 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { streamText } from 'ai';
+import { streamText, UIMessage, convertToModelMessages } from 'ai';
 import { createClient } from '@/utils/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { messages }: { messages: UIMessage[] } = await req.json();
     const supabase = await createClient();
 
     // 1. Verify Authentication
@@ -87,27 +87,29 @@ export async function POST(req: Request) {
     const userContext = buildUserContext(profile, trackingData || []);
     const knowledgeContext = buildKnowledgeContext(knowledgeEntries || []);
 
-    // 7. Build full message history (memory + current)
+    // 7. Convert UIMessages to model messages + merge with DB history
     const historyMessages = (pastMessages || []).map((m: { role: string; content: string }) => ({
       role: m.role as 'user' | 'assistant',
       content: m.content,
     }));
 
-    // Combine: past history + new messages
-    const currentMessages = messages.slice(-2); 
-    const fullMessages = [...historyMessages, ...currentMessages];
-
-    // 8. Save the latest user message to DB
+    // Extract text from current UIMessage parts for DB storage
     const latestUserMsg = messages[messages.length - 1];
     if (latestUserMsg && latestUserMsg.role === 'user') {
-      await supabaseAdmin.from('chat_messages').insert({
-        user_id: user.id,
-        role: 'user',
-        content: latestUserMsg.content,
-      });
+      const userText = latestUserMsg.parts
+        ?.filter((p: any) => p.type === 'text')
+        .map((p: any) => p.text)
+        .join('') || '';
+      if (userText) {
+        await supabaseAdmin.from('chat_messages').insert({
+          user_id: user.id,
+          role: 'user',
+          content: userText,
+        });
+      }
     }
 
-    // 9. Setup AI model
+    // 8. Setup AI model
     let model;
     
     switch (activeKey.provider.toLowerCase()) {
@@ -129,12 +131,23 @@ export async function POST(req: Request) {
       }
     }
 
-    // 10. Call AI with full context
+    // 9. Build system prompt
     const systemPrompt = buildSystemPrompt(userContext, knowledgeContext);
 
-    const result = await streamText({
+    // 10. Convert UIMessages to model-compatible format + prepend history
+    const modelMessages = await convertToModelMessages(messages);
+    
+    // Prepend DB history as additional context  
+    const historyAsModel = historyMessages.map((m: any) => ({
+      role: m.role as 'user' | 'assistant',
+      content: m.content,
+    }));
+    const fullModelMessages = [...historyAsModel, ...modelMessages];
+
+    // 11. Stream response
+    const result = streamText({
       model: model,
-      messages: fullMessages,
+      messages: fullModelMessages,
       system: systemPrompt,
       onFinish: async (event) => {
         if (event.text) {
@@ -147,7 +160,7 @@ export async function POST(req: Request) {
       },
     });
 
-    return (result as any).toDataStreamResponse();
+    return result.toUIMessageStreamResponse();
   } catch (err) {
     console.error('Chat API Error:', err);
     return new NextResponse('Internal Server Error', { status: 500 });

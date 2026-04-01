@@ -9,11 +9,10 @@ interface ChatInterfaceProps {
 
 export default function ChatInterface({ autoPrompt }: ChatInterfaceProps) {
   const [autoSent, setAutoSent] = useState(false)
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, append } = useChat({
-    api: '/api/chat',
-  } as any)
+  const [input, setInput] = useState('')
+  const { messages, status, sendMessage } = useChat()
+
+  const isLoading = status === 'submitted' || status === 'streaming'
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -23,14 +22,34 @@ export default function ChatInterface({ autoPrompt }: ChatInterfaceProps) {
 
   // Auto-send plan request after onboarding
   useEffect(() => {
-    if (autoPrompt && !autoSent && append) {
+    if (autoPrompt && !autoSent && sendMessage) {
       setAutoSent(true)
       setTimeout(() => {
-        append({ role: 'user', content: autoPrompt })
+        sendMessage({ text: autoPrompt })
       }, 800)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoPrompt, append])
+  }, [autoPrompt, sendMessage])
+  
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!input.trim() || isLoading) return
+    sendMessage({ text: input })
+    setInput('')
+  }
+
+  // Helper to extract text from message parts
+  function getMessageText(m: any): string {
+    if (m.parts && Array.isArray(m.parts)) {
+      return m.parts
+        .filter((p: any) => p.type === 'text')
+        .map((p: any) => p.text)
+        .join('')
+    }
+    // Fallback for legacy format
+    if (m.content) return m.content
+    return ''
+  }
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
@@ -45,7 +64,7 @@ export default function ChatInterface({ autoPrompt }: ChatInterfaceProps) {
               {['Berapa protein yang saya butuhkan?', 'Buat meal plan untuk bulking', 'Tips konsistensi gym'].map(suggestion => (
                 <button
                   key={suggestion}
-                  onClick={() => append({ role: 'user', content: suggestion })}
+                  onClick={() => sendMessage({ text: suggestion })}
                   className="text-xs px-3 py-1.5 rounded-full font-medium transition-all"
                   style={{ background: 'var(--surface-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
                 >
@@ -56,29 +75,32 @@ export default function ChatInterface({ autoPrompt }: ChatInterfaceProps) {
           </div>
         ) : (
           <>
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {messages.map((m: any) => (
-              <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-                {m.role === 'assistant' && (
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0 mr-2 mt-1" style={{ background: 'var(--accent)', color: '#fff' }}>🤖</div>
-                )}
-                <div
-                  className="max-w-[82%] sm:max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed font-medium"
-                  style={m.role === 'user' ? {
-                    background: 'var(--accent)',
-                    color: '#fff',
-                    borderBottomRightRadius: '0.25rem',
-                  } : {
-                    background: 'var(--surface-hover)',
-                    color: 'var(--text-primary)',
-                    border: '1px solid var(--border)',
-                    borderBottomLeftRadius: '0.25rem',
-                  }}
-                >
-                  <p className="whitespace-pre-wrap">{m.content}</p>
+            {messages.map((m: any) => {
+              const text = getMessageText(m)
+              if (!text && m.role !== 'assistant') return null
+              return (
+                <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
+                  {m.role === 'assistant' && (
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0 mr-2 mt-1" style={{ background: 'var(--accent)', color: '#fff' }}>🤖</div>
+                  )}
+                  <div
+                    className="max-w-[82%] sm:max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed font-medium"
+                    style={m.role === 'user' ? {
+                      background: 'var(--accent)',
+                      color: '#fff',
+                      borderBottomRightRadius: '0.25rem',
+                    } : {
+                      background: 'var(--surface-hover)',
+                      color: 'var(--text-primary)',
+                      border: '1px solid var(--border)',
+                      borderBottomLeftRadius: '0.25rem',
+                    }}
+                  >
+                    <p className="whitespace-pre-wrap">{text}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
             {isLoading && (
               <div className="flex justify-start animate-fade-in">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0 mr-2 mt-1" style={{ background: 'var(--accent)', color: '#fff' }}>🤖</div>
@@ -96,11 +118,11 @@ export default function ChatInterface({ autoPrompt }: ChatInterfaceProps) {
 
       {/* Input */}
       <div className="p-3 sm:p-4 border-t" style={{ borderColor: 'var(--border)' }}>
-        <form onSubmit={handleSubmit} className="flex gap-2">
+        <form onSubmit={handleFormSubmit} className="flex gap-2">
           <input
             data-chat-input
             value={input}
-            onChange={handleInputChange}
+            onChange={(e) => setInput(e.target.value)}
             placeholder="Tanya coach kamu..."
             className="input-field !rounded-2xl !py-3 text-sm"
             style={{ flex: 1 }}
