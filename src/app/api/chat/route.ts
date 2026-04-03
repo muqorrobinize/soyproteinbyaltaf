@@ -130,7 +130,8 @@ export async function POST(req: Request) {
         break;
       }
       case 'deepseek': {
-        const deepseek = createOpenAI({ apiKey: activeKey.key_value, baseURL: 'https://api.deepseek.com/v1' });
+        const { createDeepSeek } = require('@ai-sdk/deepseek');
+        const deepseek = createDeepSeek({ apiKey: activeKey.key_value });
         model = deepseek('deepseek-chat');
         break;
       }
