@@ -50,9 +50,10 @@ export async function POST(req: Request) {
     let activeKey = null;
 
     if (keys && keys.length > 0) {
-      activeKey = keys[Math.floor(Math.random() * keys.length)];
+      const selected = keys[Math.floor(Math.random() * keys.length)];
+      activeKey = { provider: selected.provider, key_value: selected.key_value.trim() };
     } else if (process.env.OPENAI_API_KEY) {
-      activeKey = { provider: 'openai', key_value: process.env.OPENAI_API_KEY };
+      activeKey = { provider: 'openai', key_value: process.env.OPENAI_API_KEY.trim() };
     }
 
     if (!activeKey) {
@@ -135,14 +136,18 @@ export async function POST(req: Request) {
     // 9. Build system prompt
     const systemPrompt = buildSystemPrompt(userContext, knowledgeContext);
 
-    // 10. Convert UIMessages to model-compatible format + prepend history
+    // 10. Convert UIMessages to model-compatible format
     const coreMessages = await convertToModelMessages(messages);
     
-    // Prepend DB history as additional context  
-    const historyAsCore = historyMessages.map(m => ({
-      role: m.role as 'user' | 'assistant',
-      content: m.content || '',
-    }));
+    // Filter history to avoid duplicating messages currently in session
+    const currentSessionContents = new Set(coreMessages.map((m: any) => m.content));
+    
+    const historyAsCore = historyMessages
+      .filter((m: any) => !currentSessionContents.has(m.content))
+      .map((m: any) => ({
+        role: m.role as 'user' | 'assistant',
+        content: m.content || '',
+      }));
     
     const fullMessages = [...historyAsCore, ...coreMessages];
 
