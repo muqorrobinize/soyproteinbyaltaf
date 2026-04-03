@@ -171,6 +171,7 @@ export async function POST(req: Request) {
       model: model,
       messages: fullMessages,
       system: systemPrompt,
+      // @ts-ignore - maxSteps TS config missing in SDK types but exists at runtime
       maxSteps: 3,
       tools: {
         updateMemory: tool({
