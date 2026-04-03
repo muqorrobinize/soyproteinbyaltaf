@@ -52,6 +52,10 @@ export async function POST(req: Request) {
     if (keys && keys.length > 0) {
       const selected = keys[Math.floor(Math.random() * keys.length)];
       activeKey = { provider: selected.provider, key_value: selected.key_value.trim() };
+    } else if (process.env.DEEPSEEK_API_KEY) {
+      activeKey = { provider: 'deepseek', key_value: process.env.DEEPSEEK_API_KEY.trim() };
+    } else if (process.env.OPENROUTER_API_KEY) {
+      activeKey = { provider: 'openrouter', key_value: process.env.OPENROUTER_API_KEY.trim() };
     } else if (process.env.OPENAI_API_KEY) {
       activeKey = { provider: 'openai', key_value: process.env.OPENAI_API_KEY.trim() };
     }
@@ -123,6 +127,16 @@ export async function POST(req: Request) {
       case 'google': {
         const google = createGoogleGenerativeAI({ apiKey: activeKey.key_value });
         model = google('gemini-1.5-flash');
+        break;
+      }
+      case 'deepseek': {
+        const deepseek = createOpenAI({ apiKey: activeKey.key_value, baseURL: 'https://api.deepseek.com/v1' });
+        model = deepseek('deepseek-chat');
+        break;
+      }
+      case 'openrouter': {
+        const openrouter = createOpenAI({ apiKey: activeKey.key_value, baseURL: 'https://openrouter.ai/api/v1' });
+        model = openrouter('openai/gpt-4o-mini'); // Fallback model structure for OpenRouter
         break;
       }
       case 'openai':
