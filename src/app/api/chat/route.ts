@@ -192,7 +192,8 @@ export async function POST(req: Request) {
       },
     });
 
-    return result.toUIMessageStreamResponse();
+    // @ts-ignore - TS generic mapped type bug overloads
+    return result.toDataStreamResponse();
   } catch (err) {
     console.error('Chat API Error:', err);
     return new NextResponse('Internal Server Error', { status: 500 });
