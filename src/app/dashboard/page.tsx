@@ -7,6 +7,7 @@ import ChatInterface from '@/components/ChatInterface'
 import ProfileView from '@/components/ProfileView'
 import TrackingWidget from '@/components/TrackingWidget'
 import ScheduleWidget from '@/components/ScheduleWidget'
+import { ClaimTrialButton } from '@/components/ClaimTrialButton'
 
 // Local Service Client Creator
 function createServiceClient(url: string, key: string) {
@@ -63,10 +64,26 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
         <div className="container-page py-10 flex flex-col items-center text-center max-w-lg mx-auto">
           <div className="text-4xl mb-6">🎟️</div>
           <h1 className="text-3xl font-black mb-4">Akses Terbatas</h1>
-          <p className="mb-8 opacity-60">Pindai kode QR di kemasan Soy Protein untuk mulai.</p>
+          {profile?.trial_claimed ? (
+            <p className="mb-8 opacity-60">Trial Anda sudah habis. Pindai kode QR di kemasan Soy Protein untuk kembali mengaktifkan AI Coach.</p>
+          ) : (
+            <p className="mb-8 opacity-60">Pindai kode QR di kemasan Soy Protein atau coba gratis selama 1 hari untuk mulai.</p>
+          )}
+
+          {!profile?.trial_claimed && (
+            <div className="mb-6 w-full">
+               <ClaimTrialButton userId={user.id} />
+               <div className="flex items-center gap-4 my-6 opacity-40">
+                  <div className="h-px bg-zinc-400 flex-1"></div>
+                  <span className="text-xs font-bold uppercase tracking-widest">ATAU</span>
+                  <div className="h-px bg-zinc-400 flex-1"></div>
+               </div>
+            </div>
+          )}
+
           <div className="w-full flex flex-col sm:flex-row gap-3">
             <Link href="/redeem" className="btn-primary flex-1">Scan Kode</Link>
-            <Link href="/auth/signout" className="btn-secondary !w-auto">Keluar</Link>
+            <a href="/auth/signout" className="btn-secondary !w-auto text-center">Keluar</a>
           </div>
         </div>
       )
@@ -124,9 +141,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
                 ⚙️ Admin
               </Link>
             )}
-            <Link href="/auth/signout" className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all" style={{ background: 'var(--surface-hover)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+            <a href="/auth/signout" className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all" style={{ background: 'var(--surface-hover)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
               Keluar
-            </Link>
+            </a>
           </div>
         </div>
 
