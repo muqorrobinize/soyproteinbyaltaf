@@ -112,20 +112,34 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
 
     return (
       <div className="flex flex-col min-h-[calc(100vh-64px)] px-4 py-2 sm:px-6 sm:py-4">
+        {/* Top bar with admin link + signout */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">🍵</span>
+            <span className="font-extrabold text-sm" style={{ color: 'var(--text-primary)' }}>SoyProtein</span>
+          </div>
+          <div className="flex items-center gap-3">
+            {isAdmin && (
+              <Link href="/admin" className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all" style={{ background: 'var(--surface-hover)', color: 'var(--accent)', border: '1px solid var(--border)' }}>
+                ⚙️ Admin
+              </Link>
+            )}
+            <Link href="/auth/signout" className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all" style={{ background: 'var(--surface-hover)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+              Keluar
+            </Link>
+          </div>
+        </div>
+
         {/* Tab Switcher */}
-        <div className="flex bg-zinc-100 dark:bg-zinc-800/50 p-1.5 rounded-2xl w-full max-w-sm mx-auto mb-6 border border-zinc-200 dark:border-zinc-800">
+        <div className="flex bg-zinc-100 dark:bg-zinc-800/50 p-1.5 rounded-2xl w-full max-w-md mx-auto mb-4 border border-zinc-200 dark:border-zinc-800">
           <Link href="/dashboard?tab=chat" className={`flex-1 text-center py-2 rounded-xl text-sm font-bold transition-all ${tab === 'chat' ? 'bg-white dark:bg-zinc-700 shadow-sm text-green-600' : 'text-zinc-500'}`}>💬 Chat</Link>
+          <Link href="/dashboard?tab=progress" className={`flex-1 text-center py-2 rounded-xl text-sm font-bold transition-all ${tab === 'progress' ? 'bg-white dark:bg-zinc-700 shadow-sm text-green-600' : 'text-zinc-500'}`}>📊 Progress</Link>
           <Link href="/dashboard?tab=profile" className={`flex-1 text-center py-2 rounded-xl text-sm font-bold transition-all ${tab === 'profile' ? 'bg-white dark:bg-zinc-700 shadow-sm text-green-600' : 'text-zinc-500'}`}>👤 Profile</Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 flex-1 min-h-0 overflow-hidden">
-          {/* Main Content */}
-          <div className="lg:col-span-8 xl:col-span-9 flex flex-col glass-panel overflow-hidden border border-zinc-200 dark:border-zinc-800">
-            {tab === 'profile' ? <ProfileView profile={profile} /> : <ChatInterface autoPrompt={autoPrompt} />}
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-4 xl:col-span-3 space-y-4 lg:space-y-6 overflow-y-auto pr-1 hidden lg:block custom-scroll">
+        {tab === 'progress' ? (
+          /* Mobile-friendly progress view */
+          <div className="flex-1 space-y-4 overflow-y-auto custom-scroll pb-4">
             <TrackingWidget 
               alreadyTrackedToday={alreadyTrackedToday} 
               streakCount={profile?.streak_count || 0}
@@ -138,7 +152,29 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
               dailyProgress={dailyProgress}
             />
           </div>
-        </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 flex-1 min-h-0 overflow-hidden">
+            {/* Main Content */}
+            <div className="lg:col-span-8 xl:col-span-9 flex flex-col glass-panel overflow-hidden border border-zinc-200 dark:border-zinc-800">
+              {tab === 'profile' ? <ProfileView profile={profile} /> : <ChatInterface autoPrompt={autoPrompt} />}
+            </div>
+
+            {/* Sidebar — desktop only */}
+            <div className="lg:col-span-4 xl:col-span-3 space-y-4 lg:space-y-6 overflow-y-auto pr-1 hidden lg:block custom-scroll">
+              <TrackingWidget 
+                alreadyTrackedToday={alreadyTrackedToday} 
+                streakCount={profile?.streak_count || 0}
+                recentDays={recentDays}
+              />
+              <ScheduleWidget 
+                weightKg={profile?.weight_kg} 
+                goal={profile?.goal} 
+                streakCount={profile?.streak_count} 
+                dailyProgress={dailyProgress}
+              />
+            </div>
+          </div>
+        )}
       </div>
     )
   } catch (criticalError) {
