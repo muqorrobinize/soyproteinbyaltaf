@@ -152,7 +152,10 @@ export async function POST(req: Request) {
     const systemPrompt = buildSystemPrompt(userContext, knowledgeContext);
 
     // 10. Convert UIMessages to model-compatible format
-    const coreMessages = await convertToModelMessages(messages);
+    const coreMessages = messages.map((m: any) => ({
+      role: m.role,
+      content: typeof m.content === 'string' ? m.content : (m.parts ? m.parts.map((p:any) => p.text).join('') : ''),
+    }));
     
     // Filter history to avoid duplicating messages currently in session
     const currentSessionContents = new Set(coreMessages.map((m: any) => m.content));
