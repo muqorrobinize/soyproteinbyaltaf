@@ -21,23 +21,23 @@ function getBaseSchedule(goal: string | undefined, weightKg: number | undefined)
   const serving = Math.round(protein / 25)
 
   const base: ScheduleItem[] = [
-    { time: '07:00', label: `Sarapan + Soy Protein #1 (25g)`, icon: '🌅' },
+    { time: '07:00', label: `Sarapan + NutriSoy #1 (25g)`, icon: '🌅' },
     { time: '12:30', label: `Makan siang — fokus protein & sayur`, icon: '🥗' },
     { time: '15:00', label: `Snack sehat (buah / kacang)`, icon: '🍎' },
     { time: '17:00', label: `Olahraga / aktivitas fisik`, icon: '🏋️' },
-    { time: '18:30', label: `Soy Protein #2 post-workout (25g)`, icon: '💪' },
+    { time: '18:30', label: `NutriSoy #2 post-workout (25g)`, icon: '💪' },
     { time: '20:00', label: `Makan malam — hindari karbohidrat berat`, icon: '🌙' },
   ]
 
   if (serving >= 3) {
-    base.splice(2, 0, { time: '10:00', label: 'Soy Protein #2 (25g) — mid-morning', icon: '🥤' })
+    base.splice(2, 0, { time: '10:00', label: 'NutriSoy #2 (25g) — mid-morning', icon: '🥤' })
   }
 
   if (goal === 'cutting') {
     base[2].label = 'Snack rendah kalori (mentimun / wortel)'
   } else if (goal === 'bulking') {
     base[2].label = 'Snack tinggi kalori (pisang + oat)'
-    base.push({ time: '22:00', label: 'Soy Protein sebelum tidur (25g)', icon: '😴' })
+    base.push({ time: '22:00', label: 'NutriSoy sebelum tidur (25g)', icon: '😴' })
   }
 
   return base

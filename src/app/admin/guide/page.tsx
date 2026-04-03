@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function AdminGuidePage() {
   const sqlScript = `-- ============================================
--- SoyProtein by Altaf - Complete Database Setup
+-- NutriSoy by Altaf - Complete Database Setup
 -- Run this ONCE in Supabase SQL Editor
 -- ============================================
 

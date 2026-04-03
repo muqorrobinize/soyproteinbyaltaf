@@ -71,7 +71,7 @@ export async function updateProfile(data: {
 }
 
 /**
- * Logs the daily soy protein consumption.
+ * Logs the daily NutriSoy consumption.
  */
 export async function logIntake() {
   try {

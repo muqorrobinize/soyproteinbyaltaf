@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { updateProfile } from '@/app/dashboard/actions'
+import { ExportPdfButton } from '@/components/ExportPdfButton'
 
 interface ProfileViewProps {
   profile: any
@@ -151,13 +152,16 @@ export default function ProfileView({ profile }: ProfileViewProps) {
           </div>
         </div>
 
-        <button 
-          onClick={handleSave} 
-          disabled={isPending}
-          className="btn-primary"
-        >
-          {isPending ? '⏳ Menyimpan...' : 'Simpan Perubahan'}
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button 
+            onClick={handleSave} 
+            disabled={isPending}
+            className="btn-primary flex-1"
+          >
+            {isPending ? '⏳ Menyimpan...' : 'Simpan Perubahan'}
+          </button>
+          <ExportPdfButton />
+        </div>
       </div>
     </div>
   )

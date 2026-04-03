@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { generateQrCode, bulkGenerateQrCodes, deleteQrCode } from '../actions'
 
-const APP_URL = typeof window !== 'undefined' ? window.location.origin : 'https://soyproteinbyaltaf.vercel.app'
+const APP_URL = typeof window !== 'undefined' ? window.location.origin : 'https://NutriSoybyaltaf.vercel.app'
 
 interface QrCode {
   code: string

@@ -65,7 +65,7 @@ export default async function RedeemPage({
         <RedeemForm initialCode={code} />
 
         <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
-          Kode ditemukan di kemasan produk SoyProtein by Altaf
+          Kode ditemukan di kemasan produk NutriSoy by Altaf
         </p>
       </div>
     </div>

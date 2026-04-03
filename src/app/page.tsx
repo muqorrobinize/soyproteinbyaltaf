@@ -14,7 +14,7 @@ export default function Home() {
       <nav className="relative z-50 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto w-full">
         <div className="flex items-center gap-2">
           <span className="text-2xl drop-shadow-sm">🍵</span>
-          <span className="font-extrabold text-xl tracking-tight" style={{ color: 'var(--text-primary)' }}>SoyProtein</span>
+          <span className="font-extrabold text-xl tracking-tight" style={{ color: 'var(--text-primary)' }}>NutriSoy</span>
           <span className="text-xs font-bold px-2 py-0.5 rounded-full ml-1" style={{ background: 'var(--surface-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>by Altaf</span>
         </div>
         <div className="flex items-center gap-4">
@@ -61,7 +61,7 @@ export default function Home() {
           <div className="text-center mb-16 px-4">
             <h2 className="text-3xl sm:text-5xl font-black mb-6 tracking-tight" style={{ color: 'var(--text-primary)' }}>Pilih Produk, Aktifkan Coach.</h2>
             <p className="max-w-2xl mx-auto text-base sm:text-lg leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-              Setiap kemasan SoyProtein membawa Anda satu langkah lebih dekat ke target fisik ideal Anda.
+              Setiap kemasan NutriSoy membawa Anda satu langkah lebih dekat ke target fisik ideal Anda.
               Scan QR Code unik di setiap botol atau pouch untuk membuka akses AI Nutritionist eksklusif.
             </p>
           </div>
@@ -114,7 +114,7 @@ export default function Home() {
 
       {/* Simple Footer */}
       <footer className="py-8 px-6 text-center text-sm font-medium border-t" style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
-        © {new Date().getFullYear()} SoyProtein by Altaf. All rights reserved.
+        © {new Date().getFullYear()} NutriSoy by Altaf. All rights reserved.
       </footer>
     </div>
   );

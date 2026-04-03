@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { bulkGenerateQrCodes } from '../actions'
 
-const APP_URL = typeof window !== 'undefined' ? window.location.origin : 'https://soyproteinbyaltaf.vercel.app'
+const APP_URL = typeof window !== 'undefined' ? window.location.origin : 'https://NutriSoybyaltaf.vercel.app'
 
 export default function BulkQrForm() {
   const [generatedCodes, setGeneratedCodes] = useState<string[]>([])

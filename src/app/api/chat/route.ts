@@ -1,7 +1,8 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { streamText, UIMessage, convertToModelMessages } from 'ai';
+import { streamText, UIMessage, convertToModelMessages, tool } from 'ai';
+import { z } from 'zod';
 import { createClient } from '@/utils/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
@@ -135,20 +136,44 @@ export async function POST(req: Request) {
     const systemPrompt = buildSystemPrompt(userContext, knowledgeContext);
 
     // 10. Convert UIMessages to model-compatible format + prepend history
-    const modelMessages = await convertToModelMessages(messages);
+    const coreMessages = await convertToModelMessages(messages);
     
     // Prepend DB history as additional context  
-    const historyAsModel = historyMessages.map((m: any) => ({
+    const historyAsCore = historyMessages.map(m => ({
       role: m.role as 'user' | 'assistant',
-      content: m.content,
+      content: m.content || '',
     }));
-    const fullModelMessages = [...historyAsModel, ...modelMessages];
+    
+    const fullMessages = [...historyAsCore, ...coreMessages];
 
-    // 11. Stream response
+    // 11. Stream response with Tools
     const result = streamText({
       model: model,
-      messages: fullModelMessages,
+      messages: fullMessages,
       system: systemPrompt,
+      tools: {
+        updateMemory: tool({
+          description: 'Perbarui diet plan atau memory (dietary notes) user jika mereka memintanya secara eksplisit.',
+          parameters: z.object({
+            newGoal: z.enum(['bulking', 'cutting', 'maintenance']).optional(),
+            dietaryNotes: z.string().describe('Catatan diet baru atau perubahan yang dibahas di chat').optional(),
+            weight_kg: z.number().optional()
+          }),
+          execute: async ({ newGoal, dietaryNotes, weight_kg }) => {
+            const updates: Record<string, any> = {};
+            if (newGoal) updates.goal = newGoal;
+            if (dietaryNotes) updates.dietary_notes = dietaryNotes;
+            if (weight_kg) updates.weight_kg = weight_kg;
+
+            if (Object.keys(updates).length > 0) {
+              const { error } = await supabaseAdmin.from('users').update(updates).eq('id', user.id);
+              if (error) return `Gagal menyimpan database: ${error.message}`;
+              return `Profil berhasil diupdate! Goal: ${newGoal||'tetap'}, Notes: ${dietaryNotes||'tetap'}`;
+            }
+            return 'Tidak ada informasi yang diupdate.';
+          }
+        })
+      },
       onFinish: async (event) => {
         if (event.text) {
           await supabaseAdmin.from('chat_messages').insert({
@@ -187,7 +212,7 @@ function buildKnowledgeContext(entries: any[]): string {
 }
 
 function buildSystemPrompt(userContext: string, knowledgeContext: string): string {
-  return `Kamu adalah AI Nutrition Coach profesional untuk platform "SoyProtein by Altaf".
+  return `Kamu adalah AI Nutrition Coach profesional untuk platform "NutriSoy by Altaf".
  
  === PERSONALISASI (WAJIB) ===
  1. Gunakan nama user jika tersedia dalam percakapan.
@@ -201,8 +226,9 @@ function buildSystemPrompt(userContext: string, knowledgeContext: string): strin
  
  === PERILAKU ===
  1. Jawab dalam Bahasa Indonesia.
- 2. Berikan rekomendasi dosis soy protein yang spesifik (misal: 2 serving/hari).
+ 2. Berikan rekomendasi dosis NutriSoy yang spesifik (misal: 2 serving/hari).
  3. Tone supportif, profesional, dan ilmiah.
+ 4. Jika user meminta kamu merubah detail plan/profil mereka (seperti goal atau riwayat makan), gunakan alat (tool) 'updateMemory'.
  
  ${userContext}
  ${knowledgeContext}`;

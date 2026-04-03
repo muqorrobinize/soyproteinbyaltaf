@@ -65,9 +65,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
           <div className="text-4xl mb-6">🎟️</div>
           <h1 className="text-3xl font-black mb-4">Akses Terbatas</h1>
           {profile?.trial_claimed ? (
-            <p className="mb-8 opacity-60">Trial Anda sudah habis. Pindai kode QR di kemasan Soy Protein untuk kembali mengaktifkan AI Coach.</p>
+            <p className="mb-8 opacity-60">Trial Anda sudah habis. Pindai kode QR di kemasan NutriSoy untuk kembali mengaktifkan AI Coach.</p>
           ) : (
-            <p className="mb-8 opacity-60">Pindai kode QR di kemasan Soy Protein atau coba gratis selama 1 hari untuk mulai.</p>
+            <p className="mb-8 opacity-60">Pindai kode QR di kemasan NutriSoy atau coba gratis selama 1 hari untuk mulai.</p>
           )}
 
           {!profile?.trial_claimed && (
@@ -133,7 +133,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <span className="text-lg">🍵</span>
-            <span className="font-extrabold text-sm" style={{ color: 'var(--text-primary)' }}>SoyProtein</span>
+            <span className="font-extrabold text-sm" style={{ color: 'var(--text-primary)' }}>NutriSoy</span>
           </div>
           <div className="flex items-center gap-3">
             {isAdmin && (

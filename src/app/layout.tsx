@@ -4,7 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "SoyProtein by Altaf",
+  title: "NutriSoy by Altaf",
   description: "AI-powered nutrition coaching and subscription platform by Altaf.",
 };
 
