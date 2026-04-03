@@ -171,6 +171,7 @@ export async function POST(req: Request) {
       model: model,
       messages: fullMessages,
       system: systemPrompt,
+      maxSteps: 3,
       tools: {
         updateMemory: tool({
           description: 'Perbarui diet plan atau memory (dietary notes) user jika mereka memintanya secara eksplisit.',
