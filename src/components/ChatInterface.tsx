@@ -10,7 +10,7 @@ interface ChatInterfaceProps {
 export default function ChatInterface({ autoPrompt }: ChatInterfaceProps) {
   const [autoSent, setAutoSent] = useState(false)
   const [input, setInput] = useState('')
-  const { messages, status, append } = useChat()
+  const { messages, status, sendMessage } = useChat()
 
   const isLoading = status === 'submitted' || status === 'streaming'
 
@@ -22,19 +22,19 @@ export default function ChatInterface({ autoPrompt }: ChatInterfaceProps) {
 
   // Auto-send plan request after onboarding
   useEffect(() => {
-    if (autoPrompt && !autoSent && append) {
+    if (autoPrompt && !autoSent && sendMessage) {
       setAutoSent(true)
       setTimeout(() => {
-        append({ role: 'user', content: autoPrompt })
+        sendMessage({ text: autoPrompt })
       }, 800)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoPrompt, append])
+  }, [autoPrompt, sendMessage])
   
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
-    append({ role: 'user', content: input })
+    sendMessage({ text: input })
     setInput('')
   }
 
@@ -74,7 +74,7 @@ export default function ChatInterface({ autoPrompt }: ChatInterfaceProps) {
               {['Berapa protein yang saya butuhkan?', 'Buat meal plan untuk bulking', 'Tips konsistensi gym'].map(suggestion => (
                 <button
                   key={suggestion}
-                  onClick={() => append({ role: 'user', content: suggestion })}
+                  onClick={() => sendMessage({ text: suggestion })}
                   className="text-xs px-3 py-1.5 rounded-full font-medium transition-all"
                   style={{ background: 'var(--surface-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
                 >
