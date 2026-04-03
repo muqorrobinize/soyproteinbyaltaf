@@ -141,6 +141,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
                 ⚙️ Admin
               </Link>
             )}
+            <Link href="/redeem" className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all" style={{ background: 'var(--surface-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
+              🎁 Redeem
+            </Link>
             <a href="/auth/signout" className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all" style={{ background: 'var(--surface-hover)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
               Keluar
             </a>

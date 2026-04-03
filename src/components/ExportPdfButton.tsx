@@ -1,36 +1,77 @@
 'use client'
 
 import { useState } from 'react'
+import { getComprehensiveReportData } from '@/app/actions/report'
 
-export function ExportPdfButton() {
+interface ExportPdfButtonProps {
+  userId: string;
+  adminMode?: boolean; // if invoked from admin panel
+}
+
+export function ExportPdfButton({ userId, adminMode = false }: ExportPdfButtonProps) {
   const [loading, setLoading] = useState(false)
+  const [daysRange, setDaysRange] = useState<number>(7)
 
   const handleExport = async () => {
     setLoading(true)
     try {
-      const html2pdf = (await import('html2pdf.js')).default
+      // 1. Fetch comprehensive data
+      const data = await getComprehensiveReportData(adminMode ? '' : userId, userId, daysRange)
+      const { profile, history, generatedAt } = data
 
+      // 2. Format history into HTML string
+      const checkInsList = history.length > 0 
+        ? history.map((h: any) => `<li>✔️ ${h.tracked_date} - Logged</li>`).join('')
+        : '<li>Belum ada data tracking untuk periode ini.</li>'
+
+      const bmi = profile?.weight_kg && profile?.height_cm 
+        ? (profile.weight_kg / Math.pow(profile.height_cm/100, 2)).toFixed(1) 
+        : '-'
+
+      // 3. Generate PDF
+      const html2pdf = (await import('html2pdf.js')).default
       const element = document.createElement('div')
       element.innerHTML = `
         <div style="padding: 40px; font-family: sans-serif; color: #1a1a1a;">
-          <h1 style="color: #2F855A; text-align: center; border-bottom: 2px solid #2F855A; padding-bottom: 10px;">NutriSoy by Altaf - Progress Report</h1>
+          <h1 style="color: #2F855A; text-align: center; border-bottom: 2px solid #2F855A; padding-bottom: 10px;">NutriSoy by Altaf - Comprehensive Report</h1>
+          <p style="text-align: right; font-size: 12px; color: #666;">Generated: ${new Date(generatedAt).toLocaleString()}</p>
+          
           <div style="margin-top: 30px;">
-            <h2>Data Profil</h2>
-            <p><strong>Nama:</strong> ${document.querySelector('input[placeholder="Nama kamu"]')?.getAttribute('value') || '-'}</p>
-            <p><strong>Berat / Tinggi:</strong> ${document.querySelectorAll('input[type="number"]')[0]?.getAttribute('value') || '-'} kg / ${document.querySelectorAll('input[type="number"]')[1]?.getAttribute('value') || '-'} cm</p>
-            <p><strong>Tujuan:</strong> ${document.querySelector('select')?.value || '-'}</p>
+            <h2>👤 Data Profil</h2>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+              <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 8px 0;"><strong>Nama:</strong></td>
+                <td>${profile?.display_name || '-'}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 8px 0;"><strong>Email:</strong></td>
+                <td>${profile?.email || '-'}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 8px 0;"><strong>Berat / Tinggi:</strong></td>
+                <td>${profile?.weight_kg || '-'} kg / ${profile?.height_cm || '-'} cm (BMI: ${bmi})</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 8px 0;"><strong>Tujuan Diet:</strong></td>
+                <td><span style="text-transform: capitalize;">${profile?.goal || '-'}</span></td>
+              </tr>
+            </table>
           </div>
-          <div style="margin-top: 30px; background: #f0fdf4; padding: 20px; border-radius: 12px;">
-            <h3 style="color: #22543d; margin-top: 0;">Jadwal Konsumsi Disarankan</h3>
-            <ul style="line-height: 1.8;">
-              <li>🌅 07:00 - Sarapan + NutriSoy #1 (25g)</li>
-              <li>🥤 10:00 - NutriSoy #2 (25g) — mid-morning</li>
-              <li>🥗 13:00 - Makan Siang Sehat</li>
-              <li>💪 18:30 - NutriSoy #3 post-workout (25g)</li>
-              <li>😴 22:00 - NutriSoy sebelum tidur (opsional)</li>
+
+          <div style="margin-top: 30px; background: #fffbe6; padding: 20px; border-radius: 12px; border: 1px solid #faad14;">
+            <h2 style="color: #d46b08; margin-top: 0;">🧠 AI Memory / Notes</h2>
+            <p style="white-space: pre-wrap; line-height: 1.5; font-size: 14px;">${profile?.dietary_notes || 'Tidak ada catatan khusus.'}</p>
+          </div>
+
+          <div style="margin-top: 30px;">
+            <h2>📊 Tracking Progress (${daysRange === 9999 ? 'Semua Waktu' : `Past ${daysRange} Days`})</h2>
+            <p>Total Check-ins: <strong>${history.length}</strong> hari</p>
+            <ul style="line-height: 1.8; font-size: 14px; background: #f9fafb; padding: 15px 15px 15px 30px; border-radius: 8px;">
+               ${checkInsList}
             </ul>
           </div>
-          <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #666;">
+
+          <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #666; border-top: 1px dashed #ccc; padding-top: 20px;">
             <p>Generated by AI Coach NutriSoy</p>
             <p>Pemesanan via WA: 085293306853 (Altaf)</p>
           </div>
@@ -38,30 +79,46 @@ export function ExportPdfButton() {
       `
 
       const opt = {
-        margin: 1,
-        filename: 'NutriSoy-Report.pdf',
+        margin: 0.5,
+        filename: `NutriSoy-Report-${profile?.email || 'User'}.pdf`,
         image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' as const }
       }
 
       await html2pdf().set(opt).from(element).save()
-    } catch (e) {
+    } catch (e: any) {
       console.error(e)
-      alert("Gagal membuat PDF.")
+      alert("Gagal membuat PDF: " + e.message)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <button 
-      onClick={handleExport}
-      disabled={loading}
-      className="btn-secondary !w-auto flex items-center justify-center gap-2"
-    >
-      <span className="text-xl">📄</span>
-      {loading ? 'Menyiapkan PDF...' : 'Download PDF Progress'}
-    </button>
+    <div className="flex items-center gap-2">
+      <select 
+        value={daysRange} 
+        onChange={e => setDaysRange(parseInt(e.target.value))}
+        className="input-field !py-2 !px-3 font-bold text-sm bg-white dark:bg-black"
+        style={{ width: '120px' }}
+      >
+        <option value={7}>Laporan 7 Hari</option>
+        <option value={30}>Laporan 30 Hari</option>
+        <option value={9999}>Semua Waktu</option>
+      </select>
+      <button 
+        onClick={handleExport}
+        disabled={loading}
+        className={adminMode ? "text-xs px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-500 transition-colors shadow-sm font-bold ml-2" : "btn-secondary !w-auto flex items-center justify-center gap-2"}
+      >
+        {adminMode ? (loading ? 'Memuat...' : 'PDF') : (
+          <>
+            <span className="text-xl">📄</span>
+            {loading ? 'Menyiapkan PDF...' : 'Download PDF Progress'}
+          </>
+        )}
+      </button>
+    </div>
   )
 }

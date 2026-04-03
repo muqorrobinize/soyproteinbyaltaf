@@ -152,7 +152,7 @@ export default function ProfileView({ profile }: ProfileViewProps) {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 mt-4 items-center w-full">
           <button 
             onClick={handleSave} 
             disabled={isPending}
@@ -160,7 +160,9 @@ export default function ProfileView({ profile }: ProfileViewProps) {
           >
             {isPending ? '⏳ Menyimpan...' : 'Simpan Perubahan'}
           </button>
-          <ExportPdfButton />
+          <div className="flex-1 mt-4 sm:mt-0">
+            <ExportPdfButton userId={profile.id} />
+          </div>
         </div>
       </div>
     </div>

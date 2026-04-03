@@ -1,5 +1,7 @@
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { toggleUserBlock, makeUserAdmin, adjustSubscription } from '../actions'
+import { AdminConcernForm } from '@/components/AdminConcernForm'
+import { ExportPdfButton } from '@/components/ExportPdfButton'
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +47,12 @@ export default async function AdminUsersPage() {
                           <p><strong style={{ color: 'var(--text-primary)' }}>Goal:</strong> {user.goal || '-'}</p>
                           <p><strong style={{ color: 'var(--text-primary)' }}>Activity:</strong> {user.activity_level || '-'}</p>
                           {user.dietary_notes && <p><strong style={{ color: 'var(--text-primary)' }}>Notes:</strong> {user.dietary_notes}</p>}
+                          <hr className="my-2 border-green-900/10 dark:border-green-100/10" />
+                          <AdminConcernForm userId={user.id} existingNotes={user.dietary_notes || ''} />
+                          <div className="flex items-center gap-2 mt-2 pt-2 border-t border-green-900/10 dark:border-green-100/10">
+                            <span className="text-xs font-bold text-[var(--text-secondary)]">Export:</span>
+                            <ExportPdfButton userId={user.id} adminMode={true} />
+                          </div>
                         </div>
                       </details>
                     </td>
